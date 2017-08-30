@@ -9,10 +9,11 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/redsift/go-sandbox-rpc/sandbox/sift"
+  rpc "github.com/redsift/go-sandbox-rpc"
+	"github.com/redsift/go-sandbox-rpc/sift"
 )
 
-type RedsiftFunc func(request ComputeRequest) (ComputeResponse, error)
+type RedsiftFunc func(request rpc.ComputeRequest) (rpc.ComputeResponse, error)
 
 type Init struct {
 	SIFT_ROOT string

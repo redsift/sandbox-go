@@ -1,0 +1,5 @@
+[[constraint]]
+  name = "github.com/redsift/go-sandbox-rpc"
+
+[[constraint]]
+  name = "github.com/go-mangos/mangos"
