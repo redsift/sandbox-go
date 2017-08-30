@@ -8,15 +8,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ENV GOLANG_VERSION 1.9
+ENV GOLANG_VERSION 1.8.3
 
 RUN set -eux; \
-    \
-    goRelSha256='d70eadefce8e160638a9a6db97f7192d8463069ab33138893ad3bf31b0650a79'; \ 
-    \
     url="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
     wget -O go.tgz "$url"; \
-    echo "${goRelSha256} *go.tgz" | sha256sum -c -; \
     tar -C /usr/local -xzf go.tgz; \
     rm go.tgz; \
     \
