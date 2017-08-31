@@ -1,8 +1,9 @@
 package sandbox
 
 import (
-  "encoding/json"
-  rpc "github.com/redsift/go-sandbox-rpc"
+	"encoding/json"
+
+	rpc "github.com/redsift/go-sandbox-rpc"
 )
 
 func toEncodedMessage(data []*rpc.ComputeResponse, diff []float64) ([]byte, error) {

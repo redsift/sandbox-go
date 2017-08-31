@@ -12,7 +12,6 @@ import (
 	"github.com/redsift/go-sandbox-rpc/sift"
 )
 
-
 type Init struct {
 	SIFT_ROOT string
 	SIFT_JSON string
