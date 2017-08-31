@@ -9,19 +9,17 @@ import (
 	"path"
 	"strconv"
 
-  rpc "github.com/redsift/go-sandbox-rpc"
 	"github.com/redsift/go-sandbox-rpc/sift"
 )
 
-type RedsiftFunc func(request rpc.ComputeRequest) (rpc.ComputeResponse, error)
 
 type Init struct {
 	SIFT_ROOT string
 	SIFT_JSON string
 	IPC_ROOT  string
 	DRY       bool
-	sift      sift.Root
-	nodes     []int
+	Sift      sift.Root
+	Nodes     []int
 }
 
 func NewInit(args []string) (Init, error) {
@@ -33,7 +31,7 @@ func NewInit(args []string) (Init, error) {
 		SIFT_JSON: os.Getenv("SIFT_JSON"),
 		IPC_ROOT:  os.Getenv("IPC_ROOT"),
 		DRY:       false,
-		nodes:     []int{},
+		Nodes:     []int{},
 	}
 
 	if len(i.SIFT_ROOT) == 0 {
@@ -58,18 +56,18 @@ func NewInit(args []string) (Init, error) {
 		return Init{}, err
 	}
 
-	err = json.Unmarshal(raw, &i.sift)
+	err = json.Unmarshal(raw, &i.Sift)
 	if err != nil {
 		return Init{}, err
 	}
 
-	if !i.sift.HasDag() {
+	if !i.Sift.HasDag() {
 		return Init{}, errors.New("sift.json does not contain any nodes")
 	}
 
 	for _, v := range args {
 		a, _ := strconv.Atoi(v)
-		i.nodes = append(i.nodes, a)
+		i.Nodes = append(i.Nodes, a)
 	}
 	return i, nil
 }
