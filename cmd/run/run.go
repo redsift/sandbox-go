@@ -53,6 +53,9 @@ func main() {
 					die("can't decode message: %s", err.Error())
 				}
 
+				if _, ok := sandbox.Computes[i]; !ok {
+					die("no node with id: %d", i)
+				}
 				start := time.Now()
 				nresp, nerr := sandbox.Computes[i](cr)
 				end := time.Since(start)
