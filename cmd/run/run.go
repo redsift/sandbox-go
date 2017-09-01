@@ -7,9 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-mangos/mangos"
-	"github.com/go-mangos/mangos/protocol/rep"
-	"github.com/go-mangos/mangos/transport/ipc"
+	ms "github.com/redsift/go-mangosock"
+	s "github.com/redsift/go-socket"
 )
 
 func main() {
@@ -37,14 +36,14 @@ func main() {
 		url := fmt.Sprintf("ipc://%s/%d.sock", info.IPC_ROOT, i)
 		go func(url string) {
 			defer wg.Done()
-			var sock mangos.Socket
+			var sock s.Socket
 			var err error
 			var msg []byte
-			if sock, err = rep.NewSocket(); err != nil {
+			if sock, err = ms.NewRepSocket(); err != nil {
 				die("can't get new rep socket: %s", err)
 			}
-			sock.AddTransport(ipc.NewTransport())
-			if err = sock.Dial(url); err != nil {
+
+			if err = sock.Connect(url); err != nil {
 				die("can't dial on rep socket: %s", err.Error())
 			}
 			for {
@@ -53,11 +52,13 @@ func main() {
 				if err != nil {
 					die("can't decode message: %s", err.Error())
 				}
+
 				start := time.Now()
 				nresp, nerr := sandbox.Computes[i](cr)
 				end := time.Since(start)
 				t := []int64{int64(end / time.Second)}
 				t = append(t, int64(end)-t[0])
+
 				var resp []byte
 				if nerr == nil {
 					resp, err = sandbox.ToEncodedMessage(nresp, t)

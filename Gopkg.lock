@@ -3,9 +3,15 @@
 
 [[projects]]
   name = "github.com/go-mangos/mangos"
-  packages = [".","protocol/rep","protocol/req","transport/ipc","transport/tcp"]
+  packages = [".","protocol/rep","protocol/req","transport/ipc"]
   revision = "7e2b8010de3b57f5880ae5b8201067fd943e3202"
   version = "v1.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/redsift/go-mangosock"
+  packages = ["."]
+  revision = "55d2894a3ab391c88b725e7d859e93ab47d4a3ca"
 
 [[projects]]
   branch = "master"
@@ -13,9 +19,15 @@
   packages = [".","sift"]
   revision = "3e168e1eabb75a3e07f2b88d67eaf88d2996ce92"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/redsift/go-socket"
+  packages = ["."]
+  revision = "8f5f10610b66716dbf48519677ceab67e435625d"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b7042f5e6bce24bb1de7e47c9980fd31c48d52932d5711f74690174c9ca6e093"
+  inputs-digest = "638e9f0d85b405c483d283c51eb8b02f159ffe58b7b6196cc4db206b88e8c789"
   solver-name = "gps-cdcl"
   solver-version = 1
