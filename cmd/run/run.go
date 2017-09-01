@@ -20,7 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	wg := &sync.WaitGroup{}
+	var wg sync.WaitGroup
 	for _, i := range info.Nodes {
 		node := info.Sift.Dag.Nodes[i]
 		if node.Implementation == nil || len(node.Implementation.Go) == 0 {
@@ -29,13 +29,15 @@ func main() {
 		}
 
 		implPath := node.Implementation.Go
-		fmt.Printf("Installing node: %s : %s\n", node.Description, implPath)
+		fmt.Printf("Running node: %s : %s\n", node.Description, implPath)
 
 		if info.DRY {
 			continue
 		}
-		go func() {
-			url := fmt.Sprintf("ipc://%s/%d.sock", info.IPC_ROOT, i)
+		wg.Add(1)
+		url := fmt.Sprintf("ipc://%s/%d.sock", info.IPC_ROOT, i)
+		go func(url string) {
+			defer wg.Done()
 			var sock mangos.Socket
 			var err error
 			var msg []byte
@@ -47,7 +49,6 @@ func main() {
 			if err = sock.Dial(url); err != nil {
 				die("can't dial on rep socket: %s", err.Error())
 			}
-			wg.Add(1)
 			for {
 				msg, err = sock.Recv()
 				cr, err := sandbox.FromEncodedMessage(msg)
@@ -77,9 +78,9 @@ func main() {
 					die("can't send reply: %s", err.Error())
 				}
 			}
-		}()
-		wg.Wait()
+		}(url)
 	}
+	wg.Wait()
 
 	if info.DRY {
 		os.Exit(0)

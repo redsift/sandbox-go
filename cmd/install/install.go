@@ -22,7 +22,7 @@ import (
 const secondPart = `
 )
 
-type RedsiftFunc func(rpc.ComputeRequest) ([]rpc.ComputeResponse, error)
+type RedsiftFunc func(rpc.ComputeRequest) ([]*rpc.ComputeResponse, error)
 
 var Computes = map[int]RedsiftFunc{`
 
