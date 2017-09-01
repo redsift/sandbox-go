@@ -50,25 +50,25 @@ func main() {
 			wg.Add(1)
 			for {
 				msg, err = sock.Recv()
-				cr, err := protocol.fromEncodedMessage(msg)
+				cr, err := sandbox.FromEncodedMessage(msg)
 				if err != nil {
 					die("can't decode message: %s", err.Error())
 				}
 				start := time.Now()
-				nresp, err := sandbox.Computes[i](cr)
+				nresp, nerr := sandbox.Computes[i](cr)
 				end := time.Since(start)
-				t = []float{end / time.Second}
-				t = append(t, end-t[0])
+				t := []int64{int64(end / time.Second)}
+				t = append(t, int64(end)-t[0])
 				var resp []byte
-				if err != nil {
-					resp, err = protocol.toEncodedMessage(nresp, t)
+				if nerr == nil {
+					resp, err = sandbox.ToEncodedMessage(nresp, t)
 					if err != nil {
-						die("issue encoding your response")
+						die("issue encoding your response: %s", err.Error())
 					}
 				} else {
-					// resp, err = protocol.toErrorBytes(
+					resp, err = sandbox.ToErrorBytes("error from node", nerr.Error())
 					if err != nil {
-						die()
+						die("issue encoding your error: %s", err.Error())
 					}
 				}
 
