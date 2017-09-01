@@ -6,7 +6,7 @@ import (
 	rpc "github.com/redsift/go-sandbox-rpc"
 )
 
-func ToEncodedMessage(data []*rpc.ComputeResponse, diff []int64) ([]byte, error) {
+func ToEncodedMessage(data []rpc.ComputeResponse, diff []int64) ([]byte, error) {
 	return json.Marshal(rpc.Response{
 		Out:   data,
 		Stats: map[string][]int64{"results": diff},

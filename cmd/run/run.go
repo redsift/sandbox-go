@@ -10,7 +10,6 @@ import (
 	"github.com/go-mangos/mangos"
 	"github.com/go-mangos/mangos/protocol/rep"
 	"github.com/go-mangos/mangos/transport/ipc"
-	"github.com/go-mangos/mangos/transport/tcp"
 )
 
 func main() {
@@ -45,7 +44,6 @@ func main() {
 				die("can't get new rep socket: %s", err)
 			}
 			sock.AddTransport(ipc.NewTransport())
-			sock.AddTransport(tcp.NewTransport())
 			if err = sock.Dial(url); err != nil {
 				die("can't dial on rep socket: %s", err.Error())
 			}
