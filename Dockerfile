@@ -33,9 +33,10 @@ WORKDIR $GOPATH/src/sandbox-go
 RUN go get -u github.com/golang/dep/cmd/dep && \
     ln -s /run/sandbox/sift/server ./sandbox/sift && \
     dep ensure && \
-    go build -o /usr/bin/redsift/install cmd/install/install.go
-    
-RUN chown -R sandbox:sandbox /usr/lib/redsift/sandbox
+    go build -o /usr/bin/redsift/install cmd/install/install.go && \
+    chmod +x /usr/bin/redsift/install && \
+    chown -R sandbox:sandbox $GOPATH
+
 
 WORKDIR /run/sandbox/sift
 
