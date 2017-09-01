@@ -20,19 +20,20 @@ RUN set -eux; \
 
 COPY root /
 COPY go-wrapper /usr/local/bin/
-COPY cmd /usr/lib/redsift/sandbox/src/sandbox-go/cmd
-COPY sandbox /usr/lib/redsift/sandbox/src/sandbox-go/sandbox
-COPY Gopkg.* /usr/lib/redsift/sandbox/src/sandbox-go/
 
 ENV GOPATH /usr/lib/redsift/sandbox
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
-WORKDIR /usr/lib/redsift/sandbox/src/sandbox-go
+COPY cmd $GOPATH/src/sandbox-go/cmd
+COPY sandbox $GOPATH/src/sandbox-go/sandbox
+COPY Gopkg.* $GOPATH/src/sandbox-go/
+
+WORKDIR $GOPATH/src/sandbox-go
 
 RUN go get -u github.com/golang/dep/cmd/dep && \
     ln -s /run/sandbox/sift/server ./sandbox/sift && \
     dep ensure && \
-    go build -o /usr/bin/redsift/install cmd/install/install.go && \
+    go build -o /usr/bin/redsift/install cmd/install/install.go
     
 RUN chown -R sandbox:sandbox /usr/lib/redsift/sandbox
 

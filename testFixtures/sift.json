@@ -1,0 +1,15 @@
+{
+  "dag":{
+    "nodes":[{
+      "#": "Go Node 1",
+      "implementation": {
+        "go": "server/node1/node1.go"
+      }
+    },{
+      "#": "Go Node 2",
+      "implementation": {
+        "go": "server/node2"
+      }
+    }]
+  }
+}
