@@ -78,7 +78,12 @@ func main() {
 		die("Failed to generate sift.go: %s", err.Error())
 	}
 
-	cmd := exec.Command("go", "build", "-o", "/run/sandbox/sift/server/_run", path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
+	buildArgs := []string{"build"}
+	if os.Getenv("LOG_LEVEL") == "debug" {
+		buildArgs = append(buildArgs, "-x")
+	}
+	buildArgs = append(buildArgs, "-v", "-o", "/run/sandbox/sift/server/_run", path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
+	cmd := exec.Command("go", buildArgs...)
 	stdoutStderr, _ := cmd.CombinedOutput()
 	fmt.Printf("%s\n", stdoutStderr)
 }
