@@ -32,7 +32,7 @@ WORKDIR $GOPATH/src/sandbox-go
 
 RUN go get -u github.com/golang/dep/cmd/dep && \
     ln -s /run/sandbox/sift/server ./sandbox/sift && \
-    dep ensure && \
+    dep ensure -v && dep status && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH

@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/redsift/go-sandbox-rpc"
   packages = [".","sift"]
-  revision = "3e168e1eabb75a3e07f2b88d67eaf88d2996ce92"
+  revision = "06d2c0504adb12cafedffd95fa7f165df57fac4c"
 
 [[projects]]
   branch = "master"
@@ -28,6 +28,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "638e9f0d85b405c483d283c51eb8b02f159ffe58b7b6196cc4db206b88e8c789"
+  inputs-digest = "f7a557dcf40e79d3b8a4eabbf6d1547c2d9485c62df47e67f16b37d97ee43821"
   solver-name = "gps-cdcl"
   solver-version = 1
