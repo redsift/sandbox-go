@@ -78,14 +78,30 @@ func main() {
 		die("Failed to generate sift.go: %s", err.Error())
 	}
 
+	//
+	// Install dependencies
+	//
+	dcmd := exec.Command("dep", "ensure")
+	dstdoutStderr, err := dcmd.CombinedOutput()
+	fmt.Printf("%s\n", dstdoutStderr)
+	if err != nil {
+		die("Installing dependencies failed: %s", err)
+	}
+
+	//
+	// Build Phase
+	//
 	buildArgs := []string{"build"}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")
 	}
 	buildArgs = append(buildArgs, "-v", "-o", "/run/sandbox/sift/server/_run", path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
-	cmd := exec.Command("go", buildArgs...)
-	stdoutStderr, _ := cmd.CombinedOutput()
-	fmt.Printf("%s\n", stdoutStderr)
+	bcmd := exec.Command("go", buildArgs...)
+	bstdoutStderr, err := bcmd.CombinedOutput()
+	fmt.Printf("%s\n", bstdoutStderr)
+	if err != nil {
+		die("Building sandbox failed: %s", err)
+	}
 }
 
 func die(format string, v ...interface{}) {
