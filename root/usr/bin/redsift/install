@@ -1,5 +1,8 @@
 #!/bin/bash
 
 pushd /usr/lib/redsift/sandbox/src/sandbox-go
+pushd sandbox/sift
+dep ensure
+popd
 exec /usr/bin/redsift/go_install $@
 popd

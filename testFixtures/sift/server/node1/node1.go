@@ -7,6 +7,6 @@ import (
 
 func Compute(rpc.ComputeRequest) ([]rpc.ComputeResponse, error){
 
-  fmt.Println("helllloooo wordddd!")
+  fmt.Println("helllloooo worldddd!")
   return nil, nil
 }

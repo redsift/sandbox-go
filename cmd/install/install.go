@@ -79,16 +79,6 @@ func main() {
 	}
 
 	//
-	// Install dependencies
-	//
-	dcmd := exec.Command("dep", "ensure")
-	dstdoutStderr, err := dcmd.CombinedOutput()
-	fmt.Printf("%s\n", dstdoutStderr)
-	if err != nil {
-		die("Installing dependencies failed: %s", err)
-	}
-
-	//
 	// Build Phase
 	//
 	buildArgs := []string{"build"}
