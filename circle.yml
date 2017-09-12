@@ -1,7 +1,7 @@
 machine:
   environment:
     GO_VERSIONS: 1.9
-    RPC_REPO: github.com/redsift/go-redsift-rpc
+    RPC_REPO: github.com/redsift/go-sandbox-rpc
     CONTAINER_NAME: quay.io/redsift/sandbox-go
   pre:
     - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.0-circleci'
@@ -14,12 +14,8 @@ dependencies:
     - docker info
     - |
       set -e
-      repo=${RPC_REPO/com\//com:}
-      echo $repo
-      git clone "git@${repo}" "root/usr/lib/redsift/sandbox/src/${RPC_REPO}"
-    - |
-      set -e
       # Build Go 1.9
+      git clone "git@${RPC_REPO/com\//com:}" "root/usr/lib/redsift/sandbox/src/${RPC_REPO}"
       docker build -t 1.9 -f Dockerfile .
 
 test:

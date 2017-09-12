@@ -21,7 +21,7 @@ RUN set -eux; \
 COPY root /
 COPY go-wrapper /usr/local/bin/
 
-ENV RPC_REPO github.com/redsift/go-redsift-rpc
+ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 
 ENV GOPATH /usr/lib/redsift/sandbox
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH

@@ -6,11 +6,11 @@ pushd $GOPATH/src/sandbox-go
 
 pushd sandbox/sift
 dep ensure
-# NOTE: go-redsift-rpc is the only shared dependency between sift and sandbox-go
+# NOTE: go-sandbox-rpc is the only shared dependency between sift and sandbox-go
 # in order to work we need to delete it from all the /vendor folders so the cloned version
 # of it in the GOPATH can be used for both. Otherwise there is a mismatch between
 # sandbox-go/vendor and sandbox-go/sandbox/sift/vendor
-rm -rf vendor/github.com/redsift/go-redsift-rpc
+rm -rf vendor/github.com/redsift/go-sandbox-rpc
 go install ./...
 popd
 
