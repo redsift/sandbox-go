@@ -21,18 +21,23 @@ RUN set -eux; \
 COPY root /
 COPY go-wrapper /usr/local/bin/
 
+ENV RPC_REPO github.com/redsift/go-redsift-rpc
+
 ENV GOPATH /usr/lib/redsift/sandbox
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+ENV SANDBOX_PATH $GOPATH/src/sandbox-go
 
-COPY cmd $GOPATH/src/sandbox-go/cmd
-COPY sandbox $GOPATH/src/sandbox-go/sandbox
-COPY Gopkg.* $GOPATH/src/sandbox-go/
+COPY cmd $SANDBOX_PATH/cmd
+COPY sandbox $SANDBOX_PATH/sandbox
+COPY Gopkg.* $SANDBOX_PATH/
 
-WORKDIR $GOPATH/src/sandbox-go
+WORKDIR $SANDBOX_PATH
 
 RUN go get -u github.com/golang/dep/cmd/dep && \
+    git clone "https://${RPC_REPO}" $GOPATH/$RPC_REPO && \
     ln -s /run/sandbox/sift/server ./sandbox/sift && \
     dep ensure -v && dep status && \
+    rm -rf vendor/$RPC_REPO && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH
