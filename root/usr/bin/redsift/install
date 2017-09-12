@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GOPATH set in Dockerfile here only for reference:
-GOPATH=/usr/lib/redsift/sandbox
+GOPATH=/usr/lib/redsift/workspace
 pushd $GOPATH/src/sandbox-go
 
 pushd sandbox/sift

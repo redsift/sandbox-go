@@ -23,7 +23,7 @@ COPY go-wrapper /usr/local/bin/
 
 ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 
-ENV GOPATH /usr/lib/redsift/sandbox
+ENV GOPATH /usr/lib/redsift/workspace
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 ENV SANDBOX_PATH $GOPATH/src/sandbox-go
 

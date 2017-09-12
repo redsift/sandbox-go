@@ -39,7 +39,7 @@ func TestComputeRequest(t *testing.T) {
 
 func TestMain(m *testing.M) {
 	go func() {
-		cmd := exec.Command("go", "run", "/usr/lib/redsift/sandbox/src/sandbox-go/cmd/run/run.go", "1")
+		cmd := exec.Command("go", "run", "/usr/lib/redsift/workspace/src/sandbox-go/cmd/run/run.go", "1")
 		stdoutStderr, _ := cmd.CombinedOutput()
 		fmt.Printf("%s\n", stdoutStderr)
 	}()
