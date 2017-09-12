@@ -34,7 +34,6 @@ COPY Gopkg.* $SANDBOX_PATH/
 WORKDIR $SANDBOX_PATH
 
 RUN go get -u github.com/golang/dep/cmd/dep && \
-    git clone "https://${RPC_REPO}" $GOPATH/$RPC_REPO && \
     ln -s /run/sandbox/sift/server ./sandbox/sift && \
     dep ensure -v && dep status && \
     rm -rf vendor/$RPC_REPO && \
