@@ -10,7 +10,8 @@ import (
 	"text/template"
 )
 
-const PROJECT_LOCATION = "/usr/lib/redsift/sandbox/src/sandbox-go"
+const SANDBOX_PATH = "sandbox-go"
+const PROJECT_LOCATION = "/usr/lib/redsift/sandbox/src/" + SANDBOX_PATH
 const SIFT_GO_LOCATION = PROJECT_LOCATION + "/sandbox/sift.go"
 const sift_temp = `package sandbox
 
@@ -56,7 +57,7 @@ func main() {
 			packageName = path.Base(implPath)
 		}
 		availableNodes[i] = Anode{
-			Path: strings.Replace(implPath, "server", "sandbox-go/sandbox/sift", 1),
+			Path: strings.Replace(implPath, "server", SANDBOX_PATH + "/sandbox/sift", 1),
 			Name: packageName,
 		}
 	}
