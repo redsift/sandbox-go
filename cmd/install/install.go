@@ -20,9 +20,7 @@ import (
 	"{{$e.Path}}"{{end}}
 )
 
-type RedsiftFunc func(rpc.ComputeRequest) ([]rpc.ComputeResponse, error)
-
-var Computes = map[int]RedsiftFunc{ {{range $i, $e := .}}
+var Computes = map[int]func(rpc.ComputeRequest) ([]rpc.ComputeResponse, error){ {{range $i, $e := .}}
 	{{$i}} : {{$e.Name}}.Compute,{{end}}
 }`
 
