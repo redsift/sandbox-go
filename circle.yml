@@ -14,7 +14,7 @@ dependencies:
     - docker info
     - |
       set -e
-      git clone "https://${RPC_REPO}" "/root/usr/lib/redsift/sandbox/src/${RPC_REPO}"
+      git clone "git@${RPC_REPO/com\//com:}" "/root/usr/lib/redsift/sandbox/src/${RPC_REPO}"
       # Build Go 1.9
       docker build -t 1.9 -f Dockerfile .
 
