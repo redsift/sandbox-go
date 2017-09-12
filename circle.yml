@@ -12,9 +12,10 @@ machine:
 dependencies:
   override:
     - docker info
+    - pwd
     - |
       set -e
-      git clone "git@${RPC_REPO/com\//com:}" "/root/usr/lib/redsift/sandbox/src/${RPC_REPO}"
+      git clone "git@${RPC_REPO/com\//com:}" "root/usr/lib/redsift/sandbox/src/${RPC_REPO}"
       # Build Go 1.9
       docker build -t 1.9 -f Dockerfile .
 
