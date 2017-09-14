@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # GOPATH set in Dockerfile here only for reference:
-GOPATH=/usr/lib/redsift/workspace
-pushd $GOPATH/src/sandbox-go
+# GOPATH=/usr/lib/redsift/workspace
 
-pushd sandbox/sift
+cd $GOPATH/src/sift
 dep ensure
 # NOTE: go-sandbox-rpc is the only shared dependency between sift and sandbox-go
 # in order to work we need to delete it from all the /vendor folders so the cloned version
@@ -12,7 +11,6 @@ dep ensure
 # sandbox-go/vendor and sandbox-go/sandbox/sift/vendor
 rm -rf vendor/github.com/redsift/go-sandbox-rpc
 go install ./...
-popd
 
+cd $GOPATH/src/sandbox-go
 exec /usr/bin/redsift/go_install $@
-popd

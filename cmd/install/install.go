@@ -55,7 +55,7 @@ func main() {
 			packageName = path.Base(implPath)
 		}
 		availableNodes[i] = Anode{
-			Path: strings.Replace(implPath, "server", SANDBOX_PATH + "/sandbox/sift", 1),
+			Path: strings.Replace(implPath, "server", "sift", 1),
 			Name: packageName,
 		}
 	}
