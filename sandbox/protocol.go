@@ -7,8 +7,12 @@ import (
 )
 
 func ToEncodedMessage(data []rpc.ComputeResponse, diff []int64) ([]byte, error) {
+	var pd []*rpc.ComputeResponse
+	for _, d := range(data){
+		pd = append(pd, &d)
+	}
 	return json.Marshal(rpc.Response{
-		Out:   data,
+		Out:   pd,
 		Stats: map[string][]int64{"results": diff},
 	})
 }
