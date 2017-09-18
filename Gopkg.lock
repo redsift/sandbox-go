@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/redsift/go-sandbox-rpc"
   packages = [".","sift"]
-  revision = "06d2c0504adb12cafedffd95fa7f165df57fac4c"
+  revision = "ab8b57fb3100cde858c788c7d719935eae8277dd"
 
 [[projects]]
   branch = "master"
