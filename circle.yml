@@ -18,7 +18,7 @@ dependencies:
       LOCAL_RPC_REPO="root/usr/lib/redsift/workspace/src/${RPC_REPO}"
       git clone "git@${RPC_REPO/com\//com:}" $LOCAL_RPC_REPO
       pushd $LOCAL_RPC_REPO
-      git checkout 4c1e682
+      git checkout 792facb
       popd
       docker build -t 1.9 -f Dockerfile .
 
