@@ -34,7 +34,7 @@ func main() {
 		}
 		wg.Add(1)
 		url := fmt.Sprintf("ipc://%s/%d.sock", info.IPC_ROOT, i)
-		go func(url string) {
+		go func(url string, idx int) {
 			defer wg.Done()
 			var sock s.Socket
 			var err error
@@ -53,11 +53,11 @@ func main() {
 					die("can't decode message: %s", err.Error())
 				}
 
-				if _, ok := sandbox.Computes[i]; !ok {
-					die("no node with id: %d", i)
+				if _, ok := sandbox.Computes[idx]; !ok {
+					die("no node with id: %d", idx)
 				}
 				start := time.Now()
-				nresp, nerr := sandbox.Computes[i](cr)
+				nresp, nerr := sandbox.Computes[idx](cr)
 				end := time.Since(start)
 				t := []int64{int64(end / time.Second)}
 				t = append(t, int64(end)-t[0])
@@ -80,7 +80,7 @@ func main() {
 					die("can't send reply: %s", err.Error())
 				}
 			}
-		}(url)
+		}(url, i)
 	}
 	wg.Wait()
 
