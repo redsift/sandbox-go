@@ -5,8 +5,8 @@ cat > sift.go << EOF
 package sandbox
 
 import (
-	rpc "github.com/redsift/go-sandbox-rpc"
+	"github.com/redsift/go-sandbox-rpc"
 )
 
-var Computes = map[int]func(rpc.ComputeRequest) ([]rpc.ComputeResponse, error){}
+var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error){}
 EOF

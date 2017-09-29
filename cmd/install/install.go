@@ -16,11 +16,11 @@ const SIFT_GO_LOCATION = PROJECT_LOCATION + "/sandbox/sift.go"
 const sift_temp = `package sandbox
 
 import (
-	rpc "github.com/redsift/go-sandbox-rpc"{{range $i, $e := .}}
+	"github.com/redsift/go-sandbox-rpc"{{range $i, $e := .}}
 	"{{$e.Path}}"{{end}}
 )
 
-var Computes = map[int]func(rpc.ComputeRequest) ([]rpc.ComputeResponse, error){ {{range $i, $e := .}}
+var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error){ {{range $i, $e := .}}
 	{{$i}} : {{$e.Name}}.Compute,{{end}}
 }`
 
