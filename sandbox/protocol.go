@@ -9,7 +9,8 @@ import (
 func ToEncodedMessage(data []sandboxrpc.ComputeResponse, diff []int64) ([]byte, error) {
 	var pd []*sandboxrpc.ComputeResponse
 	for _, d := range data {
-		pd = append(pd, &d)
+		t := d
+		pd = append(pd, &t)
 	}
 	return json.Marshal(sandboxrpc.Response{
 		Out:   pd,
