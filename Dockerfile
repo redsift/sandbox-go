@@ -34,7 +34,7 @@ COPY Gopkg.* $SANDBOX_PATH/
 WORKDIR $SANDBOX_PATH
 
 RUN go get -u github.com/golang/dep/cmd/dep && \
-    ln -s /run/sandbox/sift/server $GOPATH/src/sift && \
+    ln -s /run/sandbox/sift/server $GOPATH/src/server && \
     dep ensure -v && dep status && \
     rm -rf vendor/$RPC_REPO && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \

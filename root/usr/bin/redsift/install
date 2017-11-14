@@ -3,7 +3,7 @@
 # GOPATH set in Dockerfile here only for reference:
 # GOPATH=/usr/lib/redsift/workspace
 
-cd $GOPATH/src/sift
+cd $GOPATH/src/server
 dep ensure
 # NOTE: go-sandbox-rpc is the only shared dependency between sift and sandbox-go
 # in order to work we need to delete it from all the /vendor folders so the cloned version
