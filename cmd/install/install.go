@@ -8,7 +8,6 @@ import (
 	"sandbox-go/sandbox"
 	"strings"
 	"text/template"
-	"runtime/debug"
 )
 
 const SANDBOX_PATH = "sandbox-go"
@@ -30,8 +29,6 @@ func main() {
 	if err != nil {
 		die("%s", err.Error())
 	}
-
-	debug.SetMaxThreads(10)
 
 	type Anode struct {
 		Path string
