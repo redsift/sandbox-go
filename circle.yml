@@ -3,6 +3,7 @@ machine:
     GO_VERSIONS: 1.9
     RPC_REPO: github.com/redsift/go-sandbox-rpc
     CONTAINER_NAME: quay.io/redsift/sandbox-go
+    CIRCLE_REVERSE_DEPENDENCIES: sandbox-go-rocksdb
   pre:
     - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.0-circleci'
     - sudo chmod 0755 /usr/bin/docker
@@ -64,3 +65,4 @@ deployment:
         echo "Tagging $latest as $CONTAINER_NAME:latest"
         docker tag $latest $CONTAINER_NAME:latest
         docker push $CONTAINER_NAME
+      - ./circle_ci_trigger_build
