@@ -61,13 +61,14 @@ func main() {
 					die("can't send reply: %s", err)
 				}
 				canSend = false
-				time.Sleep(1 * time.Second)
+				time.Sleep(2 * time.Second)
 			}
 
 			defer func (){
 				event := recover()
 				if event != nil {
-					fmt.Printf("Stack: %s", debug.Stack())
+					stack := debug.Stack()
+					fmt.Printf("Stack: %s", stack)
 
 					err := errors.New("panic")
 					if evErr, ok := event.(error); ok {
@@ -76,7 +77,7 @@ func main() {
 
 					// if can send, then send err back on socket
 					if canSend {
-						sendErr(err)
+						sendErr(errors.New(err.Error() + ": " + string(stack)))
 					}
 					die("caught a node panic: %s", err)
 				}
