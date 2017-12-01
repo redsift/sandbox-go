@@ -48,11 +48,11 @@ func main() {
 			}
 
 			if err = sock.Connect(url); err != nil {
-				die("can't dial on rep socket: %s", err.Error())
+				die("can't dial on rep socket: %s", err)
 			}
 
 			sendErr := func(nerr error) {
-				resp, err := sandbox.ToErrorBytes("error from node", nerr)
+				resp, err := sandbox.ToErrorBytes("error from node", nerr.Error())
 				if err != nil {
 					die("issue encoding your error: %s", err)
 				}
