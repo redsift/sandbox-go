@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	ms "github.com/redsift/go-mangosock"
-	s "github.com/redsift/go-socket"
+	"github.com/redsift/go-mangosock"
+	"github.com/redsift/go-socket"
 	"runtime/debug"
 	"errors"
 )
@@ -40,10 +40,10 @@ func main() {
 			defer wg.Done()
 
 			canSend := false
-			var sock s.Socket
+			var sock socket.Socket
 			var err error
 			var msg []byte
-			if sock, err = ms.NewRepSocket(); err != nil {
+			if sock, err = mangosock.NewRepSocket(); err != nil {
 				die("can't get new rep socket: %s", err)
 			}
 
@@ -75,11 +75,10 @@ func main() {
 						err = evErr
 					}
 
-					// if can send, then send err back on socket
 					if canSend {
 						sendErr(errors.New(err.Error() + ": " + string(stack)))
 					}
-					die("caught a node panic: %s", err)
+					//die("caught a node panic: %s", err)
 				}
 			}()
 
