@@ -9,6 +9,8 @@ import (
 
 	ms "github.com/redsift/go-mangosock"
 	s "github.com/redsift/go-socket"
+	"runtime/debug"
+	"errors"
 )
 
 func main() {
@@ -36,6 +38,8 @@ func main() {
 		url := fmt.Sprintf("ipc://%s/%d.sock", info.IPC_ROOT, i)
 		go func(url string, idx int) {
 			defer wg.Done()
+
+			canSend := false
 			var sock s.Socket
 			var err error
 			var msg []byte
@@ -46,39 +50,77 @@ func main() {
 			if err = sock.Connect(url); err != nil {
 				die("can't dial on rep socket: %s", err.Error())
 			}
+
+			sendErr := func(nerr error) {
+				resp, err := sandbox.ToErrorBytes("error from node", nerr)
+				if err != nil {
+					die("issue encoding your error: %s", err)
+				}
+				err = sock.Send(resp)
+				if err != nil {
+					die("can't send reply: %s", err)
+				}
+				canSend = false
+			}
+
+			defer func (){
+				event := recover()
+				if event != nil {
+					fmt.Printf("Stack: %s", debug.Stack())
+
+					err := errors.New("panic")
+					if evErr, ok := event.(error); ok {
+						err = evErr
+					}
+
+					// if can send, then send err back on socket
+					if canSend {
+						sendErr(err)
+					}
+					die("caught a node panic: %s", err)
+				}
+			}()
+
 			for {
+				canSend = false
+
 				msg, err = sock.Recv()
+				if err != nil {
+					die("error receiving from socket: %s", err)
+				}
+				canSend = true
+
 				cr, err := sandbox.FromEncodedMessage(msg)
 				if err != nil {
-					die("can't decode message: %s", err.Error())
+					sendErr(err)
+					die("can't decode message: %s", err)
 				}
-
 				if _, ok := sandbox.Computes[idx]; !ok {
+					sendErr(fmt.Errorf("no node with id: %d", idx))
 					die("no node with id: %d", idx)
 				}
 				start := time.Now()
-				nresp, nerr := sandbox.Computes[idx](cr)
+				nresp, err := sandbox.Computes[idx](cr)
+				if err != nil {
+					sendErr(err)
+					continue
+				}
 				end := time.Since(start)
 				t := []int64{int64(end / time.Second)}
 				t = append(t, int64(end)-t[0])
 
-				var resp []byte
-				if nerr == nil {
-					resp, err = sandbox.ToEncodedMessage(nresp, t)
-					if err != nil {
-						die("issue encoding your response: %s", err.Error())
-					}
-				} else {
-					resp, err = sandbox.ToErrorBytes("error from node", nerr.Error())
-					if err != nil {
-						die("issue encoding your error: %s", err.Error())
-					}
+
+				resp, err := sandbox.ToEncodedMessage(nresp, t)
+				if err != nil {
+					sendErr(err)
+					die("issue encoding your response: %s", err)
 				}
 
 				err = sock.Send(resp)
 				if err != nil {
-					die("can't send reply: %s", err.Error())
+					die("can't send reply: %s", err)
 				}
+				canSend = false
 			}
 		}(url, i)
 	}
