@@ -61,6 +61,7 @@ func main() {
 					die("can't send reply: %s", err)
 				}
 				canSend = false
+				time.Sleep(1 * time.Second)
 			}
 
 			defer func (){
