@@ -20,6 +20,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	panicked := false
 	var wg sync.WaitGroup
 	for _, i := range info.Nodes {
 		node := info.Sift.Dag.Nodes[i]
@@ -65,8 +66,9 @@ func main() {
 
 			defer func (){
 				event := recover()
-				
+
 				if event != nil {
+					panicked = true
 					stack := debug.Stack()
 					fmt.Printf("Stack: %s\n", stack)
 
@@ -76,6 +78,7 @@ func main() {
 					}
 
 					if canSend {
+						fmt.Println("canSend")
 						sendErr(err, string(stack))
 					}
 					fmt.Printf("caught a node panic: %s\n", err)
@@ -127,6 +130,10 @@ func main() {
 		}(url, i)
 	}
 	wg.Wait()
+
+	if panicked {
+		select{} // wait to get killed
+	}
 }
 
 func die(format string, v ...interface{}) {
