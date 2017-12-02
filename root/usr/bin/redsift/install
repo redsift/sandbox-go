@@ -12,5 +12,5 @@ dep ensure
 rm -rf vendor/github.com/redsift/go-sandbox-rpc
 go install ./...
 
-cd $GOPATH/src/sandbox-go
+cd $GOPATH/src/github.com/redsift/sandbox-go
 exec /usr/bin/redsift/go_install $@
