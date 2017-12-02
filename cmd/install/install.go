@@ -5,9 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"sandbox-go/sandbox"
 	"strings"
 	"text/template"
+
+	"github.com/redsift/sandbox-go/sandbox"
 )
 
 const SANDBOX_PATH = "sandbox-go"

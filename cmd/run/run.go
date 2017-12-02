@@ -1,16 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
-	"sandbox-go/sandbox"
+	"runtime/debug"
 	"sync"
 	"time"
 
 	"github.com/redsift/go-mangosock"
 	"github.com/redsift/go-socket"
-	"runtime/debug"
-	"errors"
+	"github.com/redsift/sandbox-go/sandbox"
 )
 
 func main() {
@@ -51,7 +51,7 @@ func main() {
 				die("can't dial on rep socket: %s", err)
 			}
 
-			sendErr := func(nerr error) {
+			sendErr := func(nerr error, stack string) {
 				resp, err := sandbox.ToErrorBytes("error from node", nerr.Error())
 				if err != nil {
 					die("issue encoding your error: %s", err)
@@ -75,7 +75,7 @@ func main() {
 					}
 
 					if canSend {
-						sendErr(errors.New(err.Error() + ": " + string(stack)))
+						sendErr(err, string(stack))
 					}
 					//die("caught a node panic: %s", err)
 				}
@@ -92,17 +92,17 @@ func main() {
 
 				cr, err := sandbox.FromEncodedMessage(msg)
 				if err != nil {
-					sendErr(err)
+					sendErr(err, "")
 					die("can't decode message: %s", err)
 				}
 				if _, ok := sandbox.Computes[idx]; !ok {
-					sendErr(fmt.Errorf("no node with id: %d", idx))
+					sendErr(fmt.Errorf("no node with id: %d", idx), "")
 					die("no node with id: %d", idx)
 				}
 				start := time.Now()
 				nresp, err := sandbox.Computes[idx](cr)
 				if err != nil {
-					sendErr(err)
+					sendErr(err, "")
 					continue
 				}
 				end := time.Since(start)
@@ -112,7 +112,7 @@ func main() {
 
 				resp, err := sandbox.ToEncodedMessage(nresp, t)
 				if err != nil {
-					sendErr(err)
+					sendErr(err, "")
 					die("issue encoding your response: %s", err)
 				}
 
@@ -125,10 +125,6 @@ func main() {
 		}(url, i)
 	}
 	wg.Wait()
-
-	if info.DRY {
-		os.Exit(0)
-	}
 }
 
 func die(format string, v ...interface{}) {

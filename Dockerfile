@@ -8,7 +8,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ENV GOLANG_VERSION 1.9
+ENV GOLANG_VERSION 1.9.2
 
 RUN set -eux; \
     url="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
@@ -25,7 +25,7 @@ ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 
 ENV GOPATH /usr/lib/redsift/workspace
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV SANDBOX_PATH $GOPATH/src/sandbox-go
+ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
