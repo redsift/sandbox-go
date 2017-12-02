@@ -9,9 +9,15 @@ import (
 	"time"
 
 	"github.com/redsift/go-mangosock"
+	"github.com/redsift/go-sandbox-rpc"
 	"github.com/redsift/go-socket"
 	"github.com/redsift/sandbox-go/sandbox"
 )
+
+type result struct {
+	response []sandboxrpc.ComputeResponse
+	err      map[string]interface{}
+}
 
 func main() {
 	info, err := sandbox.NewInit(os.Args[1:])
@@ -64,9 +70,8 @@ func main() {
 				canSend = false
 			}
 
-			defer func (){
+			defer func() {
 				event := recover()
-
 				if event != nil {
 					panicked = true
 					stack := debug.Stack()
@@ -81,7 +86,7 @@ func main() {
 						fmt.Println("canSend")
 						sendErr(err, string(stack))
 					}
-					fmt.Printf("caught a node panic: %s\n", err)
+					fmt.Printf("caught a sandbox panic: %s\n", err)
 					//die("caught a node panic: %s", err)
 				}
 			}()
@@ -105,17 +110,56 @@ func main() {
 					die("no node with id: %d", idx)
 				}
 				start := time.Now()
-				nresp, err := sandbox.Computes[idx](cr)
-				if err != nil {
+				ch := make(chan *result)
+				go func(ch chan<- *result) {
+					defer func() {
+						event := recover()
+						if event != nil {
+							stack := debug.Stack()
+							fmt.Printf("Stack: %s\n", stack)
+
+							err := errors.New("panic")
+							if evErr, ok := event.(error); ok {
+								err = evErr
+							}
+
+							ch <- &result{
+								err: map[string]interface{}{
+									"message": err.Error(),
+									"stack":   string(stack),
+								},
+							}
+
+							fmt.Printf("caught a node panic: %s\n", err)
+						}
+					}()
+
+					nresp, err := sandbox.Computes[idx](cr)
+					if err != nil {
+						ch <- &result{
+							err: map[string]interface{}{
+								"message": err.Error(),
+							},
+						}
+						return
+					}
+
+					ch <- &result{
+						response: nresp,
+					}
+				}(ch)
+
+				res := <-ch
+				if res.err != nil {
 					sendErr(err, "")
 					continue
 				}
+
 				end := time.Since(start)
 				t := []int64{int64(end / time.Second)}
 				t = append(t, int64(end)-t[0])
 
-
-				resp, err := sandbox.ToEncodedMessage(nresp, t)
+				resp, err := sandbox.ToEncodedMessage(res.response, t)
 				if err != nil {
 					sendErr(err, "")
 					die("issue encoding your response: %s", err)
@@ -132,7 +176,7 @@ func main() {
 	wg.Wait()
 
 	if panicked {
-		select{} // wait to get killed
+		select {} // wait to get killed
 	}
 }
 
