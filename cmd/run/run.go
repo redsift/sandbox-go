@@ -52,7 +52,7 @@ func main() {
 			}
 
 			sendErr := func(nerr error, stack string) {
-				resp, err := sandbox.ToErrorBytes("error from node", nerr.Error())
+				resp, err := sandbox.ToErrorBytes(nerr.Error(), stack)
 				if err != nil {
 					die("issue encoding your error: %s", err)
 				}
@@ -65,9 +65,10 @@ func main() {
 
 			defer func (){
 				event := recover()
+				
 				if event != nil {
 					stack := debug.Stack()
-					fmt.Printf("Stack: %s", stack)
+					fmt.Printf("Stack: %s\n", stack)
 
 					err := errors.New("panic")
 					if evErr, ok := event.(error); ok {
@@ -77,6 +78,7 @@ func main() {
 					if canSend {
 						sendErr(err, string(stack))
 					}
+					fmt.Printf("caught a node panic: %s\n", err)
 					//die("caught a node panic: %s", err)
 				}
 			}()
