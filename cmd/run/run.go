@@ -16,7 +16,7 @@ import (
 
 type result struct {
 	response []sandboxrpc.ComputeResponse
-	err      map[string]interface{}
+	err      map[string]string
 }
 
 func main() {
@@ -124,7 +124,7 @@ func main() {
 							}
 
 							ch <- &result{
-								err: map[string]interface{}{
+								err: map[string]string{
 									"message": err.Error(),
 									"stack":   string(stack),
 								},
@@ -137,7 +137,7 @@ func main() {
 					nresp, err := sandbox.Computes[idx](cr)
 					if err != nil {
 						ch <- &result{
-							err: map[string]interface{}{
+							err: map[string]string{
 								"message": err.Error(),
 							},
 						}
@@ -151,7 +151,7 @@ func main() {
 
 				res := <-ch
 				if res.err != nil {
-					sendErr(err, "")
+					sendErr(errors.New(res.err["message"]), res.err["stack"])
 					continue
 				}
 
