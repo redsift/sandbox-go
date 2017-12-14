@@ -2,6 +2,7 @@ machine:
   environment:
     GO_VERSIONS: 1.9
     RPC_REPO: github.com/redsift/go-sandbox-rpc
+    RPC_REPO_COMMIT: c7a7e80
     CONTAINER_NAME: quay.io/redsift/sandbox-go
     CIRCLE_REVERSE_DEPENDENCIES: sandbox-go-rocksdb
   pre:
@@ -19,7 +20,7 @@ dependencies:
       LOCAL_RPC_REPO="root/usr/lib/redsift/workspace/src/${RPC_REPO}"
       git clone "git@${RPC_REPO/com\//com:}" $LOCAL_RPC_REPO
       pushd $LOCAL_RPC_REPO
-      git checkout c7a7e80
+      git checkout $RPC_REPO_COMMIT
       popd
       docker build -t 1.9 -f Dockerfile .
 
