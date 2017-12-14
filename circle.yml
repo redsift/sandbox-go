@@ -34,11 +34,11 @@ test:
       do
         INIT=$(docker inspect -f "{{index .Config.Labels \"io.redsift.sandbox.install\" }}" $GV)
         echo "Calling init = $INIT"
-        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift $GV $INIT 0 1
+        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift $GV $INIT 0 1 2
         ls -A $PWD/testFixtures/sift/server || true
         RUN=$(docker inspect -f "{{index .Config.Labels \"io.redsift.sandbox.run\" }}" $GV)
         echo "Calling run = $RUN"
-        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift:ro -e DRY=true $GV $RUN 0 1
+        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift:ro -e DRY=true $GV $RUN 0 1 2
       done
 
 deployment:
