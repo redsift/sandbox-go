@@ -1,7 +1,8 @@
 machine:
   environment:
-    GO_VERSIONS: 1.9
+    GO_VERSIONS: 1.9.2
     RPC_REPO: github.com/redsift/go-sandbox-rpc
+    RPC_REPO_COMMIT: c7a7e80
     CONTAINER_NAME: quay.io/redsift/sandbox-go
     CIRCLE_REVERSE_DEPENDENCIES: sandbox-go-rocksdb
   pre:
@@ -19,9 +20,12 @@ dependencies:
       LOCAL_RPC_REPO="root/usr/lib/redsift/workspace/src/${RPC_REPO}"
       git clone "git@${RPC_REPO/com\//com:}" $LOCAL_RPC_REPO
       pushd $LOCAL_RPC_REPO
-      git checkout c7a7e80
+      git checkout $RPC_REPO_COMMIT
       popd
-      docker build -t 1.9 -f Dockerfile .
+      for GV in $GO_VERSIONS
+      do
+        docker build --build-arg GOLANG_VERSION=$GV -t $GV -f Dockerfile .
+      done
 
 test:
   override:
@@ -34,11 +38,11 @@ test:
       do
         INIT=$(docker inspect -f "{{index .Config.Labels \"io.redsift.sandbox.install\" }}" $GV)
         echo "Calling init = $INIT"
-        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift $GV $INIT 0 1
+        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift $GV $INIT 0 1 2
         ls -A $PWD/testFixtures/sift/server || true
         RUN=$(docker inspect -f "{{index .Config.Labels \"io.redsift.sandbox.run\" }}" $GV)
         echo "Calling run = $RUN"
-        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift:ro -e DRY=true $GV $RUN 0 1
+        docker run -u 7438:7438 -v $PWD/testFixtures/sift:/run/sandbox/sift:ro -e DRY=true $GV $RUN 0 1 2
       done
 
 deployment:

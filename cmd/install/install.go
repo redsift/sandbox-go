@@ -17,12 +17,12 @@ const SIFT_GO_LOCATION = PROJECT_LOCATION + "/sandbox/sift.go"
 const sift_temp = `package sandbox
 
 import (
-	"github.com/redsift/go-sandbox-rpc"{{range $i, $e := .}}
-	"{{$e.Path}}"{{end}}
+	"github.com/redsift/go-sandbox-rpc"{{range $p := .Paths}}
+	"{{$p}}"{{end}}
 )
 
-var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error){ {{range $i, $e := .}}
-	{{$i}} : {{$e.Name}}.Compute,{{end}}
+var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error){ {{range $i, $e := .NodeNames}}
+	{{$i}} : {{$e}}.Compute,{{end}}
 }`
 
 func main() {
@@ -31,11 +31,8 @@ func main() {
 		die("%s", err.Error())
 	}
 
-	type Anode struct {
-		Path string
-		Name string
-	}
-	availableNodes := map[int]Anode{}
+	uniquePaths := map[string]int{}
+	nodeNames := map[int]string{}
 	for _, i := range info.Nodes {
 		node := info.Sift.Dag.Nodes[i]
 		if node.Implementation == nil || len(node.Implementation.Go) == 0 {
@@ -55,10 +52,13 @@ func main() {
 			implPath = path.Dir(implPath)
 			packageName = path.Base(implPath)
 		}
-		availableNodes[i] = Anode{
-			Path: implPath,
-			Name: packageName,
-		}
+
+		uniquePaths[implPath] = 1
+		nodeNames[i] = packageName
+	}
+	paths := []string{}
+	for k := range uniquePaths {
+		paths = append(paths, k)
 	}
 
 	fo, err := os.Create(SIFT_GO_LOCATION)
@@ -73,7 +73,10 @@ func main() {
 
 	t := template.New("sift.go")
 	t, _ = t.Parse(sift_temp)
-	err = t.Execute(fo, availableNodes)
+	err = t.Execute(fo, struct {
+		Paths []string
+		NodeNames map[int]string
+	}{paths, nodeNames})
 	if err != nil {
 		die("Failed to generate sift.go: %s", err.Error())
 	}

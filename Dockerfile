@@ -8,7 +8,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ENV GOLANG_VERSION 1.9.2
+ARG GOLANG_VERSION=1.9.2
 
 RUN set -eux; \
     url="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
