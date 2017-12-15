@@ -1,6 +1,6 @@
 machine:
   environment:
-    GO_VERSIONS: 1.9
+    GO_VERSIONS: 1.9.2
     RPC_REPO: github.com/redsift/go-sandbox-rpc
     RPC_REPO_COMMIT: c7a7e80
     CONTAINER_NAME: quay.io/redsift/sandbox-go
@@ -22,7 +22,10 @@ dependencies:
       pushd $LOCAL_RPC_REPO
       git checkout $RPC_REPO_COMMIT
       popd
-      docker build -t 1.9 -f Dockerfile .
+      for GV in $GO_VERSIONS
+      do
+        docker build --build-arg GOLANG_VERSION=$GV -t $GV -f Dockerfile .
+      done
 
 test:
   override:
