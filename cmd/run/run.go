@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/redsift/go-mangosock"
+	"github.com/redsift/go-mangosock/nano"
 	"github.com/redsift/go-sandbox-rpc"
-	"github.com/redsift/go-socket"
 	"github.com/redsift/sandbox-go/sandbox"
 )
 
@@ -47,7 +47,7 @@ func main() {
 			defer wg.Done()
 
 			canSend := false
-			var sock socket.Socket
+			var sock nano.Rep
 			var err error
 			var msg []byte
 			if sock, err = mangosock.NewRepSocket(); err != nil {
@@ -63,7 +63,7 @@ func main() {
 				if err != nil {
 					die("issue encoding your error: %s", err)
 				}
-				err = sock.Send(resp)
+				_, err = sock.Send(resp)
 				if err != nil {
 					die("can't send reply: %s", err)
 				}
@@ -165,7 +165,7 @@ func main() {
 					die("issue encoding your response: %s", err)
 				}
 
-				err = sock.Send(resp)
+				_, err = sock.Send(resp)
 				if err != nil {
 					die("can't send reply: %s", err)
 				}
