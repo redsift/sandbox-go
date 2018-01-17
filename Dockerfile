@@ -9,6 +9,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
 ARG GOLANG_VERSION=1.9.2
+ARG GODEP_V=v0.3.2
 
 RUN set -eux; \
     url="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
@@ -33,7 +34,8 @@ COPY Gopkg.* $SANDBOX_PATH/
 
 WORKDIR $SANDBOX_PATH
 
-RUN go get -u github.com/golang/dep/cmd/dep && \
+RUN wget -O /usr/local/bin/dep "https://github.com/golang/dep/releases/download/${GODEP_V}/dep-linux-amd64" && \
+    chmod +x /usr/local/bin/dep && \
     ln -s /run/sandbox/sift/server $GOPATH/src/server && \
     dep ensure -v && dep status && \
     rm -rf vendor/$RPC_REPO && \
