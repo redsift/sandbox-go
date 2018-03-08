@@ -1,6 +1,6 @@
 machine:
   environment:
-    GO_VERSIONS: 1.9.2 1.9.4
+    GO_VERSIONS: 1.9.2 1.9.4 1.10
     RPC_REPO: github.com/redsift/go-sandbox-rpc
     RPC_REPO_COMMIT: c7a7e80
     CONTAINER_NAME: quay.io/redsift/sandbox-go
@@ -58,14 +58,14 @@ deployment:
           GO_VERSION=$(docker run -u 7438:7438 -t --entrypoint=/usr/local/go/bin/go $GV version 2>&1 | cut -s -d " " -f3 | sed 's/go//')
           VERSION_ARRAY=(${GO_VERSION//_/ })
           VERSION=v${VERSION_ARRAY[0]}
-          MAJOR_NUMBER=(${VERSION//./ })
-          MAJOR_VERSION=$MAJOR_NUMBER
           echo "Tagging as $CONTAINER_NAME:$VERSION"
           docker tag $GV:latest $CONTAINER_NAME:$VERSION
-          echo "Tagging as $CONTAINER_NAME:$MAJOR_VERSION"
-          docker tag $GV:latest $CONTAINER_NAME:$MAJOR_VERSION
           latest=$GV:latest
         done
+        MAJOR_NUMBER=(${VERSION//./ })
+        MAJOR_VERSION=$MAJOR_NUMBER
+        echo "Tagging as $CONTAINER_NAME:$MAJOR_VERSION"
+        docker tag $GV:latest $CONTAINER_NAME:$MAJOR_VERSION
         echo "Tagging $latest as $CONTAINER_NAME:latest"
         docker tag $latest $CONTAINER_NAME:latest
         docker push $CONTAINER_NAME
