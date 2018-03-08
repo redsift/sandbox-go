@@ -8,11 +8,11 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ARG GOLANG_VERSION=1.9.2
-ARG GODEP_V=v0.3.2
+ARG golang_version=1.9.4
+ENV GODEP_V=v0.4.1
 
 RUN set -eux; \
-    url="https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
+    url="https://golang.org/dl/go${golang_version}.linux-amd64.tar.gz"; \
     wget -O go.tgz "$url"; \
     tar -C /usr/local -xzf go.tgz; \
     rm go.tgz; \
