@@ -3,6 +3,11 @@
 # GOPATH set in Dockerfile here only for reference:
 # GOPATH=/usr/lib/redsift/workspace
 
+if [ -n ${GITHUB_HTTP_TOKEN:-} ]; then
+  git config --global url."https://$GITHUB_HTTP_TOKEN:@github.com".insteadOf "https://github.com"
+  git config --global url."https://$GITHUB_HTTP_TOKEN:@github.com/".insteadOf "git@github.com:"
+fi
+
 cd $GOPATH/src/server
 dep ensure
 # NOTE: go-sandbox-rpc is the only shared dependency between sift and sandbox-go
