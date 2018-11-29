@@ -1,6 +1,6 @@
 machine:
   environment:
-    GO_VERSIONS: 1.9.2 1.9.4 1.10
+    GO_VERSIONS: 1.9.4 1.10 1.11.2
     RPC_REPO: github.com/redsift/go-sandbox-rpc
     RPC_REPO_COMMIT: c7a7e80
     CONTAINER_NAME: quay.io/redsift/sandbox-go
