@@ -1,0 +1,264 @@
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"runtime/debug"
+	"strconv"
+	"sync"
+	"sync/atomic"
+	"syscall"
+	"time"
+
+	"github.com/redsift/go-mangosock"
+	"github.com/redsift/go-mangosock/nano"
+	"github.com/redsift/go-sandbox-rpc"
+
+	// requested nodes
+	{{- range $p, $v := .Paths }}
+	"{{ $p }}"
+	{{- end }}
+)
+
+// type computeFunc func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error)
+
+const (
+	IDLE int32 = iota
+	BUSY
+	CLOSED
+)
+
+type node struct {
+	idx     int
+	desc    string
+	url     string
+	compute func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error)
+	state   int32
+	sock    nano.Rep
+}
+
+var knownNodes = map[int]*node{
+	{{- range $i, $n := .Nodes }}
+	{{ $i }}: {idx: {{ $i }}, desc: "{{ $n.Desc }}", compute: {{ $n.PkgName }}.Compute },
+	{{- end }}
+}
+
+func configureSystemLogger() *log.Logger {
+	// TODO configure syslog
+	h, _ := os.Hostname()
+	return log.New(os.Stderr, h, log.LstdFlags)
+}
+
+func main() {
+	slog := configureSystemLogger()
+
+	nodes, dryRun, err := configure(os.Args[1:])
+	if err != nil {
+		slog.Printf("invalid sandbox configuration: %s\n", err)
+		os.Exit(1)
+	}
+
+	if dryRun {
+		slog.Println(`¯\_(ツ)_/¯ dry run...`)
+		return
+	}
+
+	fatal := make(chan struct{})
+	var wg sync.WaitGroup
+	// cfg.nodes refers to known *nodes only
+	for _, n := range nodes {
+		wg.Add(1)
+		go func(n *node) {
+			defer wg.Done()
+			log.Printf("starting node %s at %s\n", n, n.url)
+			if err := n.listenAndServe(); err != nil {
+				slog.Printf("node %s execution failed: %s\n", n, err)
+				fatal <- struct{}{}
+			}
+		}(n)
+	}
+
+	sigs := make(chan os.Signal)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		var sig os.Signal
+		select {
+		case sig = <-sigs:
+			log.Printf("got %s; initiate shutdown\n", sig)
+		case <-fatal:
+			log.Println("node failed; initiate shutdown")
+		}
+		for _, n := range nodes {
+			log.Printf("closing node %s\n", n)
+			n.close()
+		}
+	}()
+
+	wg.Wait()
+}
+
+func (n *node) String() string {
+	return fmt.Sprintf("#%d %q", n.idx, n.desc)
+}
+
+func (n *node) listenAndServe() error {
+	defer n.close()
+
+	var (
+		err error
+		msg []byte
+	)
+
+	if n.sock, err = mangosock.NewRepSocket(); err != nil {
+		return fmt.Errorf("can't get new rep socket: %s", err)
+	}
+
+	if err = n.sock.Connect(n.url); err != nil {
+		return fmt.Errorf("can't dial on rep socket: %s", err)
+	}
+
+	replyWithError := func(e error, stack []byte) error {
+		resp, err := encodeError(e.Error(), stack)
+		if err != nil {
+			return fmt.Errorf("error encoding failed: %s", err)
+		}
+		if _, err = n.sock.Send(resp); err != nil {
+			return fmt.Errorf("couldn't send error reply: %s", err)
+		}
+		return nil
+	}
+
+	// node's req/rep loop
+	for {
+		if v := atomic.LoadInt32(&n.state); v == CLOSED {
+			break
+		}
+		atomic.StoreInt32(&n.state, IDLE)
+		msg, err = n.sock.Recv()
+		if v := atomic.LoadInt32(&n.state); v == CLOSED {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("error receiving from socket: %s", err)
+		}
+		atomic.StoreInt32(&n.state, BUSY)
+
+		req, err := decodeRequest(msg)
+		if err != nil {
+			return replyWithError(err, nil)
+		}
+
+		stopTimer := startTimer()
+		res, stack, err := n.execCompute(req)
+
+		if err != nil {
+			if serr := replyWithError(err, stack); serr != nil {
+				return serr
+			}
+			continue
+		}
+
+		resp, err := encodeResponse(res, stopTimer())
+		if err != nil {
+			return replyWithError(err, nil)
+		}
+
+		if _, err := n.sock.Send(resp); err != nil {
+			return fmt.Errorf("couldn't send reply: %s", err)
+		}
+	}
+	return nil
+}
+
+func (n *node) close() {
+	v := atomic.LoadInt32(&n.state)
+	atomic.StoreInt32(&n.state, CLOSED)
+	if v == IDLE && n.sock != nil {
+		_ = n.sock.Close()
+	}
+}
+
+func (n *node) execCompute(req sandboxrpc.ComputeRequest) (res []sandboxrpc.ComputeResponse, stack []byte, err error) {
+	defer func() {
+		evt := recover()
+		if evt != nil {
+			stack = debug.Stack()
+
+			err = errors.New("panic")
+			if v, ok := evt.(error); ok {
+				err = v
+			}
+		}
+	}()
+
+	res, err = n.compute(req)
+	return
+}
+
+func startTimer() func() []int64 {
+	start := time.Now()
+	return func() []int64 {
+		d := time.Since(start)
+		seconds := int64(d.Seconds())
+		return []int64{seconds, int64(d) - seconds}
+	}
+}
+
+func configure(args []string) ([]*node, bool, error) {
+	dryRun, _ := strconv.ParseBool(os.Getenv("DRY"))
+
+	if args == nil || len(args) == 0 {
+		return nil, dryRun, errors.New("no nodes to execute")
+	}
+
+	ipcRoot, found := os.LookupEnv("IPC_ROOT")
+	if !found {
+		return nil, dryRun, errors.New("environment variable IPC_ROOT not found")
+	}
+
+	var nodes []*node
+
+	for _, arg := range args {
+		idx, err := strconv.Atoi(arg)
+		if err != nil {
+			return nil, dryRun, fmt.Errorf("couldn't parse arg %s: %s", arg, err)
+		}
+		n, found := knownNodes[idx]
+		if !found {
+			return nil, dryRun, fmt.Errorf("requested to run an unknown *node #%d", idx)
+		}
+		n.url = fmt.Sprintf("ipc://%s/%d.sock", ipcRoot, idx)
+		nodes = append(nodes, n)
+	}
+
+	return nodes, dryRun, nil
+}
+
+func encodeResponse(data []sandboxrpc.ComputeResponse, duration []int64) ([]byte, error) {
+	var pd []*sandboxrpc.ComputeResponse
+	for _, d := range data {
+		t := d
+		pd = append(pd, &t)
+	}
+	return json.Marshal(sandboxrpc.Response{
+		Out:   pd,
+		Stats: map[string][]int64{"results": duration},
+	})
+}
+
+func encodeError(message string, stack []byte) ([]byte, error) {
+	return json.Marshal(sandboxrpc.Response{
+		Error: map[string]string{
+			"message": message,
+			"stack":   string(stack)}})
+}
+
+func decodeRequest(bytes []byte) (sandboxrpc.ComputeRequest, error) {
+	cr := sandboxrpc.ComputeRequest{}
+	err := json.Unmarshal(bytes, &cr)
+	return cr, err
+}
