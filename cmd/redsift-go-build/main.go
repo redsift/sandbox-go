@@ -42,10 +42,10 @@ func main() {
 		Paths: uniquePaths,
 		Nodes: nodes,
 	}
-	//deferFunc = func() {
-	//	log.Printf("deleting %s", mainAbsPath)
-	//	_ = os.Remove(mainAbsPath)
-	//}
+	deferFunc = func() {
+		log.Printf("deleting %s", mainAbsPath)
+		_ = os.Remove(mainAbsPath)
+	}
 	defer deferFunc()
 	if err := internal.GenerateSiftMain(MainName, mainAbsPath, cfg); err != nil {
 		die("couldn't generate %q: %s", mainAbsPath, err)
@@ -55,10 +55,9 @@ func main() {
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		args = append(args, "-x")
 	}
-	args = append(args, "-v", "-o", envString("SIFT_BIN", "/run/sandbox/sift/server/_run"), MainName)
+	binPath := envString("SIFT_BIN", "/run/sandbox/sift/server/_run")
+	args = append(args, "-v", "-o", binPath, MainName)
 	buildCmd := exec.Command("go", args...)
-	//buildCmd := exec.Command("go", "env")
-	buildCmd.Env = []string{fmt.Sprintf("GOPATH=%s", os.Getenv("GOPATH"))}
 	// TODO
 	//  create link $GOPATH/$nodesPackage
 	//  remove link $GOPATH/$nodesPackage if we created it
@@ -77,6 +76,8 @@ func main() {
 
 	if err := buildCmd.Wait(); err != nil {
 		die("'go build' failed: %s", err)
+	} else {
+		log.Printf("done (out=%q)", binPath)
 	}
 }
 
@@ -122,7 +123,7 @@ func configure(args []string) (string, string, []Node, error) {
 		return errEnvVarNotFound("SIFT_ROOT")
 	}
 	if siftFile, found = os.LookupEnv("SIFT_JSON"); !found {
-		return errEnvVarNotFound("SIFT_ROOT")
+		return errEnvVarNotFound("SIFT_JSON")
 	}
 
 	siftPath := path.Join(siftRoot, siftFile)
@@ -183,10 +184,6 @@ func configure(args []string) (string, string, []Node, error) {
 		delete(requiredNodes, i)
 	}
 
-	if len(nodeRoots) != 1 {
-		return newError("no common root folder found for requested implementations")
-	}
-
 	// have all nodes been resolved ?
 	if len(requiredNodes) != 0 {
 		n := make([]int, 0, len(requiredNodes))
@@ -194,6 +191,10 @@ func configure(args []string) (string, string, []Node, error) {
 			n = append(n, i)
 		}
 		return newError("requested to install undefined nodes %v", n)
+	}
+
+	if len(nodeRoots) != 1 {
+		return newError("no common root folder found for requested implementations")
 	}
 
 	return siftRoot, nodesPackage, nodes, nil
