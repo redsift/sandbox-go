@@ -87,6 +87,11 @@ func main() {
 	if VerboseMode {
 		args = append(args, "-v")
 	}
+
+	if binPath, err = filepath.Abs(binPath); err != nil {
+		Fatalf("could't output result to %q: %q", binPath, err)
+	}
+
 	args = append(args, "-o", binPath, siftMainFile)
 
 	buildCmd := exec.Command("go", args...)
