@@ -96,6 +96,8 @@ func main() {
 		"GOPATH=" + localGoPath + ":" + Goenv("GOPATH"), // put local gopath in front of system wide
 		"PATH=/usr/bin",                                 // go might need clang
 		"GOCACHE=" + Goenv("GOCACHE"),                   // use system wide cache
+		"GOARCH=" + os.Getenv("GOARCH"),
+		"GOOS=" + os.Getenv("GOOS"),
 	}
 	buildCmd.Dir = workingDir
 	Verbosef("execute go: dir=%q env=%v args=%v", buildCmd.Dir, buildCmd.Env, args)
