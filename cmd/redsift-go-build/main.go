@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,32 +11,46 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/redsift/sandbox-go/cmd/redsift-go-build/internal"
-
 	"github.com/redsift/go-sandbox-rpc/sift"
+	"github.com/redsift/sandbox-go/cmd/redsift-go-build/internal"
 )
 
-const MainName = "main___.go"
-
-var deferFunc = func() {}
+var VerboseMode bool
 
 func main() {
-	siftRoot, nodesPackage, nodes, err := configure(os.Args[1:])
+	var (
+		siftPath     string
+		reuseTempDir bool
+		binPath      string
+	)
+	flag.StringVar(&siftPath, "sift", "", "path to the sift.json file")
+	flag.StringVar(&binPath, "o", EnvString("SIFT_BIN", "/run/sandbox/sift/server/_run"), "write the resulting executable to the named output file")
+	flag.BoolVar(&reuseTempDir, "reuse-workdir", false, "reuse temporary working dir")
+	flag.BoolVar(&VerboseMode, "v", false, "verbose mode")
+	flag.Parse()
+
+	const (
+		siftMainFile = "main___.go"
+	)
+	defer RunBeforeExit()
+
+	siftRoot, nodesPackage, nodes, err := Configure(siftPath, flag.Args())
 	if err != nil {
-		die("invalid sandbox configuration: %s", err)
+		Fatalf("invalid sandbox configuration: %s", err)
 	}
 
+	Verbosef("using sift: dir=%q", siftRoot)
 	uniquePaths := make(map[string]struct{})
 	for _, n := range nodes {
 		uniquePaths[n.PkgPath] = struct{}{}
-		log.Printf("selecting node #%d %q", n.Idx, n.Desc)
+		Verbosef("node added: idx=%d desc=%q", n.Idx, n.Desc)
 	}
 
-	mainAbsPath := path.Join(siftRoot, nodesPackage, MainName)
-	log.Printf("generating %q", mainAbsPath)
+	siftMainPath := path.Join(siftRoot, nodesPackage, siftMainFile)
 	cfg := struct {
 		Paths map[string]struct{}
 		Nodes []Node
@@ -42,46 +58,94 @@ func main() {
 		Paths: uniquePaths,
 		Nodes: nodes,
 	}
-	deferFunc = func() {
-		log.Printf("deleting %s", mainAbsPath)
-		_ = os.Remove(mainAbsPath)
+
+	Deferf(func() { _ = os.RemoveAll(siftMainPath) }, "remove %q", siftMainPath)
+	if err := internal.GenerateSiftMain(siftMainFile, siftMainPath, cfg); err != nil {
+		Fatalf("couldn't create %q: %s", siftMainPath, err)
 	}
-	defer deferFunc()
-	if err := internal.GenerateSiftMain(MainName, mainAbsPath, cfg); err != nil {
-		die("couldn't generate %q: %s", mainAbsPath, err)
+
+	localGoPath, workingDir, err := MkTempPkgDir(path.Join(siftRoot, nodesPackage), reuseTempDir)
+	if err != nil {
+		Fatalf("couldn't create temp dir: %s", err)
 	}
+
+	Deferf(func() { _ = os.RemoveAll(siftMainPath) }, "remove %q", localGoPath)
 
 	args := []string{"build"}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		args = append(args, "-x")
 	}
-	binPath := envString("SIFT_BIN", "/run/sandbox/sift/server/_run")
-	args = append(args, "-v", "-o", binPath, MainName)
+	if VerboseMode {
+		args = append(args, "-v")
+	}
+	args = append(args, "-o", binPath, siftMainFile)
+
 	buildCmd := exec.Command("go", args...)
-	// TODO
-	//  create link $GOPATH/$nodesPackage
-	//  remove link $GOPATH/$nodesPackage if we created it
-	buildCmd.Dir = path.Join(os.Getenv("GOPATH"), "src", nodesPackage)
-	log.Printf("building %q (dir=%q, env=%v, args=%v)", mainAbsPath, buildCmd.Dir, buildCmd.Env, args)
+
+	buildCmd.Env = []string{
+		"PWD=" + workingDir,                             // need that as syscall.Chdir changes working dir to real dir, not to symlink
+		"GOPATH=" + localGoPath + ":" + Goenv("GOPATH"), // put local gopath in front of system wide
+		"PATH=/usr/bin",                                 // go might need clang
+		"GOCACHE=" + Goenv("GOCACHE"),                   // use system wide cache
+	}
+	buildCmd.Dir = workingDir
+	Verbosef("execute go: dir=%q env=%v args=%v", buildCmd.Dir, buildCmd.Env, args)
 
 	r, w := io.Pipe()
 	buildCmd.Stdout = w
 	buildCmd.Stderr = w
 
 	if err := buildCmd.Start(); err != nil {
-		die("can't start 'go build': %s", err)
+		Fatalf("can't start 'go build': %s", err)
 	}
 
 	go io.Copy(os.Stdout, r)
 
 	if err := buildCmd.Wait(); err != nil {
-		die("'go build' failed: %s", err)
+		Fatalf("'go build' failed: %s", err)
 	} else {
-		log.Printf("done (out=%q)", binPath)
+		Verbosef("done: output=%q", binPath)
 	}
 }
 
-func envString(key, def string) string {
+func Goenv(name string) string {
+	var out bytes.Buffer
+	cmd := exec.Command("go", "env", name)
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		return ""
+	}
+	return string(bytes.TrimSpace(out.Bytes()))
+}
+
+func MkTempPkgDir(pkgDir string, reuseDir bool) (string, string, error) {
+	const parentPkgDir = "___redsift-go-build"
+	var (
+		gopath string
+		err    error
+	)
+	if reuseDir {
+		gopath = path.Join(os.TempDir(), parentPkgDir)
+	} else {
+		gopath, err = ioutil.TempDir(os.TempDir(), parentPkgDir)
+	}
+	if err != nil {
+		return "", "", err
+	}
+	src := path.Join(gopath, "src")
+	if err := os.MkdirAll(src, 0755); err != nil {
+		_ = os.RemoveAll(gopath)
+		return "", "", err
+	}
+	pkg := path.Join(src, path.Base(pkgDir))
+	if err := os.Symlink(pkgDir, pkg); err != nil && !(reuseDir && os.IsExist(err)) {
+		_ = os.RemoveAll(gopath)
+		return "", "", err
+	}
+	return gopath, pkg, nil
+}
+
+func EnvString(key, def string) string {
 	v, found := os.LookupEnv(key)
 	if !found {
 		return def
@@ -89,9 +153,36 @@ func envString(key, def string) string {
 	return v
 }
 
-func die(format string, v ...interface{}) {
-	deferFunc()
-	log.Println("FATAL:", fmt.Sprintf(format, v...))
+type deferredFunc struct {
+	f      func()
+	format string
+	args   []interface{}
+}
+
+var deferredFuncs []deferredFunc
+
+func Deferf(f func(), fmt string, args ...interface{}) func() {
+	deferredFuncs = append(deferredFuncs, deferredFunc{f, fmt, args})
+	return f
+}
+
+func RunBeforeExit() {
+	for _, v := range deferredFuncs {
+		Verbosef(v.format, v.args...)
+		v.f()
+	}
+}
+
+func Verbosef(format string, args ...interface{}) {
+	if !VerboseMode {
+		return
+	}
+	log.Println("INFO:", fmt.Sprintf(format, args...))
+}
+
+func Fatalf(format string, args ...interface{}) {
+	RunBeforeExit()
+	log.Println("FATAL:", fmt.Sprintf(format, args...))
 	os.Exit(1)
 }
 
@@ -102,7 +193,7 @@ type Node struct {
 	PkgName string
 }
 
-func configure(args []string) (string, string, []Node, error) {
+func Configure(siftPath string, args []string) (string, string, []Node, error) {
 	newError := func(f string, args ...interface{}) (string, string, []Node, error) {
 		return "", "", nil, fmt.Errorf(f, args...)
 	}
@@ -119,14 +210,22 @@ func configure(args []string) (string, string, []Node, error) {
 		siftFile string
 		found    bool
 	)
-	if siftRoot, found = os.LookupEnv("SIFT_ROOT"); !found {
-		return errEnvVarNotFound("SIFT_ROOT")
-	}
-	if siftFile, found = os.LookupEnv("SIFT_JSON"); !found {
-		return errEnvVarNotFound("SIFT_JSON")
+
+	if siftPath == "" {
+		if siftRoot, found = os.LookupEnv("SIFT_ROOT"); !found {
+			return errEnvVarNotFound("SIFT_ROOT")
+		}
+		siftFile = EnvString("SIFT_JSON", "sift.json")
+
+		siftPath = path.Join(siftRoot, siftFile)
+	} else {
+		p, err := filepath.Abs(siftPath)
+		if err != nil {
+			return newError("couldn't resolve path %s: %s", siftPath, err)
+		}
+		siftRoot, siftFile = path.Split(p)
 	}
 
-	siftPath := path.Join(siftRoot, siftFile)
 	raw, err := ioutil.ReadFile(siftPath)
 	if err != nil {
 		return newError("could't read file %s: %s", siftPath, err)
@@ -184,7 +283,7 @@ func configure(args []string) (string, string, []Node, error) {
 		delete(requiredNodes, i)
 	}
 
-	// have all nodes been resolved ?
+	// do we have all nodes resolved?
 	if len(requiredNodes) != 0 {
 		n := make([]int, 0, len(requiredNodes))
 		for i := range requiredNodes {
