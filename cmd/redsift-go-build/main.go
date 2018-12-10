@@ -26,19 +26,28 @@ func main() {
 		siftPath     string
 		reuseTempDir bool
 		binPath      string
+		helpWanted   bool
+		allNodes     bool
 	)
-	flag.StringVar(&siftPath, "sift", "", "path to the sift.json file")
-	flag.StringVar(&binPath, "o", EnvString("SIFT_BIN", "/run/sandbox/sift/server/_run"), "write the resulting executable to the named output file")
+	flag.BoolVar(&helpWanted, "h", false, "show this help")
+	flag.StringVar(&siftPath, "sift", "", "path to the sift.json file; you can set SIFT_ROOT and SIFT_JSON env vars as an alternative")
+	flag.StringVar(&binPath, "o", EnvString("SIFT_BIN", "/run/sandbox/sift/server/_run"), "write the resulting executable to the named output file; you can set SIFT_BIN env var as an alternative")
 	flag.BoolVar(&reuseTempDir, "reuse-workdir", false, "reuse temporary working dir")
+	flag.BoolVar(&allNodes, "all", false, "compile all go nodes")
 	flag.BoolVar(&VerboseMode, "v", false, "verbose mode")
 	flag.Parse()
+
+	if helpWanted {
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
 	const (
 		siftMainFile = "main___.go"
 	)
 	defer RunBeforeExit()
 
-	siftRoot, nodesPackage, nodes, err := Configure(siftPath, flag.Args())
+	siftRoot, nodesPackage, nodes, err := Configure(siftPath, flag.Args(), allNodes)
 	if err != nil {
 		Fatalf("invalid sandbox configuration: %s", err)
 	}
@@ -193,7 +202,7 @@ type Node struct {
 	PkgName string
 }
 
-func Configure(siftPath string, args []string) (string, string, []Node, error) {
+func Configure(siftPath string, args []string, allNodes bool) (string, string, []Node, error) {
 	newError := func(f string, args ...interface{}) (string, string, []Node, error) {
 		return "", "", nil, fmt.Errorf(f, args...)
 	}
@@ -201,7 +210,7 @@ func Configure(siftPath string, args []string) (string, string, []Node, error) {
 		return newError("environment variable %s not found", s)
 	}
 
-	if len(args) == 0 {
+	if len(args) == 0 && !allNodes {
 		return newError("no nodes requested; nothing to do")
 	}
 
@@ -242,12 +251,21 @@ func Configure(siftPath string, args []string) (string, string, []Node, error) {
 	}
 
 	requiredNodes := make(map[int]struct{})
-	for i, arg := range args {
-		n, err := strconv.Atoi(arg)
-		if err != nil {
-			return newError("can't parse argument #%d %q: %s", i, arg, err)
+	if len(args) == 0 && allNodes {
+		for i, n := range root.Dag.Nodes {
+			if n.Implementation == nil || len(n.Implementation.Go) == 0 {
+				continue
+			}
+			requiredNodes[i] = struct{}{}
 		}
-		requiredNodes[n] = struct{}{}
+	} else {
+		for i, arg := range args {
+			n, err := strconv.Atoi(arg)
+			if err != nil {
+				return newError("can't parse argument #%d %q: %s", i, arg, err)
+			}
+			requiredNodes[n] = struct{}{}
+		}
 	}
 
 	nodesPackage := ""
