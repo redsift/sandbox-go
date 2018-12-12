@@ -103,6 +103,8 @@ func main() {
 		"GOCACHE=" + Goenv("GOCACHE"),                   // use system wide cache
 		"GOARCH=" + os.Getenv("GOARCH"),
 		"GOOS=" + os.Getenv("GOOS"),
+		"CGO_CFLAGS=" + os.Getenv("CGO_CFLAGS"),
+		"CGO_LDFLAGS=" + os.Getenv("CGO_LDFLAGS"),
 	}
 	buildCmd.Dir = workingDir
 	Verbosef("execute go: dir=%q env=%v args=%v", buildCmd.Dir, buildCmd.Env, args)
