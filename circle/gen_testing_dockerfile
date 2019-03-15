@@ -17,5 +17,7 @@ LABEL email="christos@redsift.io"
 LABEL version="1.0.1"
 
 COPY --chown=7438:7438 testFixtures/sift /run/sandbox/sift
+RUN /usr/bin/redsift/install ${TEST_NODES}
+
 EOF
 
