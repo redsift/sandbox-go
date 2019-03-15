@@ -1,8 +1,8 @@
 #!/bin/bash
 set -eu
 
-NV=$1
-imageName=$NV-testing
+GV=$1
+imageName=$GV-testing
 # ubuntu version
 # sudo groupadd -g 7438 sandbox
 # alpine version

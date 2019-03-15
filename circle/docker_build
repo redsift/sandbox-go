@@ -10,7 +10,7 @@ SUFFIX="-beta"
 if [ $tagName == "release" ]; then
   SUFFIX=""
 fi
-imageName=$CONTAINER_NAME:v$NV$SUFFIX
+imageName=$CONTAINER_NAME:v$GV$SUFFIX
 
 LOCAL_RPC_REPO="root/usr/lib/redsift/workspace/src/${RPC_REPO}"
 git clone "git@${RPC_REPO/com\//com:}" $LOCAL_RPC_REPO
