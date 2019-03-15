@@ -55,7 +55,7 @@ jobs:
           islatest: true
 
   trigger-builds:
-    executor: baseexec
+    executor: dockexec
     steps:
       - attach_workspace:
           at: /
