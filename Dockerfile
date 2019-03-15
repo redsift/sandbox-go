@@ -1,5 +1,7 @@
 FROM quay.io/redsift/sandbox:latest
-MAINTAINER Christos Vontas email: christos@redsift.io version: 1.0.0
+LABEL author="Christos Vontas"
+LABEL email="christos@redsift.io"
+LABEL version="1.0.2"
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
