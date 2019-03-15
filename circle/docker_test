@@ -23,4 +23,5 @@ docker run -u 7438:7438 $imageName $INIT $TEST_NODES
 
 RUN=$(docker inspect -f '{{index .Config.Labels "io.redsift.sandbox.run" }}' $imageName)
 echo "Calling run = $RUN"
+docker run -u 7438:7438 -e DRY=true $imageName -c "ls -al ./server"
 docker run -u 7438:7438 -e DRY=true $imageName $RUN $TEST_NODES
