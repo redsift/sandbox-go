@@ -26,17 +26,17 @@ echo "Container reported version:${V}"
 
 MinorV=$(echo $GV | sed "s/\([0-9]\).\([0-9]\).*/\1.\2/")
 MinorV_TAG=$CONTAINER_NAME:v$MinorV$SUFFIX
-echo "Tagging as $MinorV"
-docker tag $imageName $MinorV
+echo "Tagging as $MinorV_TAG"
+docker tag $imageName $MinorV_TAG
 
-if [[ -n "$IS_LATEST" ]]; then 
+if [[ "$IS_LATEST" == "true" ]]; then 
   MAJOR_VERSION=(${GV//./ })
   MV_TAG=$CONTAINER_NAME:v$MAJOR_VERSION$SUFFIX
   echo "Tagging as $MV_TAG"
   docker tag $imageName $MV_TAG
 fi
 
-if [[ "$tagName" == "release" ]] && [[ -n "$IS_LATEST" ]]; then
+if [[ "$tagName" == "release" ]] && [[ "$IS_LATEST" == "true" ]]; then
   echo "Tagging as $CONTAINER_NAME:latest"
   docker tag $imageName $CONTAINER_NAME:latest
 fi
