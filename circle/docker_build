@@ -24,7 +24,7 @@ docker build --build-arg golang_version=$GV -t $imageName .
 V=$(docker run -u 7438:7438 -t --entrypoint=/usr/local/go/bin/go $imageName version 2>&1 | cut -s -d " " -f3 | sed 's/go//')
 echo "Container reported version:${V}"
 
-MinorV=$(echo $GV | sed "s/\([0-9]\).\([0-9]\).*/\1.\2/")
+MinorV=$(echo $GV | sed "s/\(.*\)\.\(.*\)\..*/\1.\2/")
 MinorV_TAG=$CONTAINER_NAME:v$MinorV$SUFFIX
 echo "Tagging as $MinorV_TAG"
 docker tag $imageName $MinorV_TAG
