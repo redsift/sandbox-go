@@ -6,7 +6,6 @@ default:
     RPC_REPO_COMMIT: e56484a
     CONTAINER_NAME: quay.io/redsift/sandbox-go
     CIRCLE_REVERSE_DEPENDENCIES: sandbox-go-rocksdb
-    TEST_NODES: "0 1 2"
 executors:
   dockexec:
     shell: /bin/bash
