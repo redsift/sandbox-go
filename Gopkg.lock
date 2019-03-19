@@ -29,14 +29,14 @@
   revision = "fa9f5b559a934752d4347f9416607ee44fcf50f0"
 
 [[projects]]
-  digest = "1:2823130d0e6650b885a126be1644704791921fb4ca2ecdbec3031a045020d0af"
+  digest = "1:23c9216bfe5c9b20907c5f46bd89c0d2aea68afde051275061569b55893e22b9"
   name = "github.com/redsift/go-sandbox-rpc"
   packages = [
     ".",
     "sift",
   ]
   pruneopts = ""
-  revision = "c7a7e8027a750304d12db13b270af95c3a35a97e"
+  revision = "e56484a1d4279c73e1ed558be5711808233502ee"
 
 [solve-meta]
   analyzer-name = "dep"
