@@ -47,13 +47,19 @@ jobs:
     executor: dockexec
     steps:
       - v_build:
-          nv: "1.11.6"
+          nv: "1.11.13"
   
   build_12:
     executor: dockexec
     steps:
       - v_build:
-          nv: "1.12.1"
+          nv: "1.12.14"
+
+  build_13:
+    executor: dockexec
+    steps:
+      - v_build:
+          nv: "1.13.5"
           islatest: true
 
   trigger-builds:
@@ -70,6 +76,7 @@ workflows:
       - build_default
       - build_11
       - build_12
+      - build_13
       - trigger-builds:
           requires:
             - build_default
