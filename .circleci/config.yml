@@ -73,10 +73,14 @@ workflows:
   version: 2.1
   build-and-deploy:
     jobs:
-      - build_default
-      - build_11
-      - build_12
-      - build_13
+      - build_default:
+          context: org-global
+      - build_11:
+          context: org-global
+      - build_12:
+          context: org-global
+      - build_13:
+          context: org-global
       - trigger-builds:
           requires:
             - build_default
@@ -84,3 +88,4 @@ workflows:
             branches:
               only:
                 - master
+                - release-1
