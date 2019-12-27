@@ -1,11 +1,11 @@
 #!/bin/bash
 
 repoList=( $CIRCLE_REVERSE_DEPENDENCIES )
-branch="${CIRCLE_BRANCH/\//%2F}" # urlencode slashes
-# repoList=()
 
 for repo in "${repoList[@]}"
 do
   echo Triggering CI build $repo && \
-    curl -v -X POST "https://circleci.com/api/v1/project/redsift/${repo}/tree/${branch}?circle-token=${CIRCLE_TOKEN}"
+    curl -v --header "Content-Type: application/json" \
+    -d "{\"branch\":\"${CIRCLE_BRANCH}\"}" \
+    -X POST "https://circleci.com/api/v1.1/project/github/redsift/${repo}/build?circle-token=${CIRCLE_TOKEN}"
 done
