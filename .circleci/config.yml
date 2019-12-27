@@ -29,10 +29,6 @@ commands:
       - run: ./circle/docker_build << parameters.nv >> << parameters.islatest >>
       - run: ./circle/gen_testing_dockerfile << parameters.nv >>
       - run: ./circle/docker_test << parameters.nv >>
-      - persist_to_workspace:
-          root: ./
-          paths:
-            - circle
       - deploy:
           command: docker push $CONTAINER_NAME
 
@@ -65,9 +61,8 @@ jobs:
   trigger-builds:
     executor: dockexec
     steps:
-      - attach_workspace:
-          at: /
-      - run: /circle/trigger_build
+      - checkout
+      - run: ./circle/trigger_build
 
 workflows:
   version: 2.1
