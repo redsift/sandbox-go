@@ -7,5 +7,8 @@ branch="${CIRCLE_BRANCH/\//%2F}" # urlencode slashes
 for repo in "${repoList[@]}"
 do
   echo Triggering CI build $repo && \
-    curl -v -X POST "https://circleci.com/api/v1.1/project/redsift/${repo}/tree/${branch}?circle-token=${CIRCLE_TOKEN}"
+    curl -v \
+    --header "Content-Type: application/json" \
+    --request POST \
+    "https://circleci.com/api/v1.1/project/redsift/${repo}/tree/${branch}?circle-token=${CIRCLE_TOKEN}"
 done
