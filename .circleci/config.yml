@@ -51,12 +51,6 @@ workflows:
     jobs:
       - build_default:
           context: org-global
-      - build_11:
-          context: org-global
-      - build_12:
-          context: org-global
-      - build_13:
-          context: org-global
       - trigger-builds:
           requires:
             - build_default
