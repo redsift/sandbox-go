@@ -10,7 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ARG golang_version=1.10.8
+ARG golang_version=1.15.4
 ENV GODEP_V=v0.5.0
 
 RUN set -eux; \
@@ -26,18 +26,19 @@ COPY go-wrapper /usr/local/bin/
 
 ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 
-ENV GOBIN /usr/lib/redsift/workspace/bin
-ENV PATH $GOBIN:/usr/local/go/bin:$PATH
+ENV GOPATH /usr/lib/redsift/workspace
+ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
-ENV GOPRIVATE github.com/redsift/
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
+COPY go.* $SANDBOX_PATH/
 
 WORKDIR $SANDBOX_PATH
 
-RUN  \
+RUN \
     ln -s /run/sandbox/sift/server $GOPATH/src/server && \
+    rm -rf vendor/$RPC_REPO && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH
