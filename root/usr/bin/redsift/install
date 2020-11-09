@@ -9,15 +9,6 @@ if [ -n "${GITHUB_HTTP_TOKEN:-}" ]; then
 fi
 
 cd $GOPATH/src/server
-dep ensure -vendor-only || true
-if [ ! -f "./Gopkg.lock" ]; then
-  echo "NOTE: You will need to provide a Gopkg.lock to install deps with golang/dep"
-fi
-# NOTE: go-sandbox-rpc is the only shared dependency between sift and sandbox-go
-# in order to work we need to delete it from all the /vendor folders so the cloned version
-# in the GOPATH can be used for both. Otherwise there is a mismatch between
-# sandbox-go/vendor and sandbox-go/sandbox/sift/vendor
-rm -rf vendor/github.com/redsift/go-sandbox-rpc
 go install ./...
 
 cd $GOPATH/src/github.com/redsift/sandbox-go
