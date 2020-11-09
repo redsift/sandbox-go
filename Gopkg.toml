@@ -1,7 +1,0 @@
-[[constraint]]
-  name = "github.com/redsift/go-sandbox-rpc"
-  revision = "e56484a1d4279c73e1ed558be5711808233502ee"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/redsift/go-mangosock"

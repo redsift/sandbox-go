@@ -2,7 +2,7 @@ package node2
 
 import (
 	"fmt"
-	"server/utils"
+	"github.com/redsift/sandbox-go/testFixtures/sift/server/utils"
 
 	"github.com/redsift/go-sandbox-rpc"
 )

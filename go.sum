@@ -1,0 +1,7 @@
+github.com/go-mangos/mangos v1.2.0 h1:ZP8bPLEjEsZw6wo68WRDtTvnMW0fqYCYCvJzlYgg7Yk=
+github.com/go-mangos/mangos v1.2.0/go.mod h1:YdIQuRLk16QkCaBzTrcXSxmOvvbzi6UE+JXQonzD/pc=
+github.com/redsift/go-mangosock v0.0.0-20180115012248-fa9f5b559a93 h1:toyP8k8RivJ36bTd3NSicMaG+9XY9pqDpEV+fVnICt0=
+github.com/redsift/go-mangosock v0.0.0-20180115012248-fa9f5b559a93/go.mod h1:AaRQDUEzkXXgEiQx3fBI3Jxn4tz4AXGcicEazdCZZW8=
+github.com/redsift/go-sandbox-rpc v0.0.0-20190108170927-e56484a1d427 h1:NIZ+0raRfOIGNI5/uM/0snTB4OtxGKHtW8VcTpz+1Dg=
+github.com/redsift/go-sandbox-rpc v0.0.0-20190108170927-e56484a1d427/go.mod h1:57m4ei6UvUwdB8jFxy5QWDLhIgYngPfI+dIRnoPndUI=
+github.com/redsift/go-sandbox-rpc v0.0.0-20200511193908-a6e5d4529bf7 h1:6Fjspu17JoCBBO3ves6b9mnKwoxxUmLjow6buRDwFRQ=
