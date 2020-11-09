@@ -29,6 +29,7 @@ ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 ENV GOPATH /usr/lib/redsift/workspace
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
+ENV GO111MODULE on
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
@@ -38,7 +39,6 @@ WORKDIR $SANDBOX_PATH
 
 RUN \
     ln -s /run/sandbox/sift/server $GOPATH/src/server && \
-    rm -rf vendor/$RPC_REPO && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH
