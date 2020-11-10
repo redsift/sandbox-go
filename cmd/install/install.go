@@ -66,6 +66,10 @@ func main() {
 		paths = append(paths, k)
 	}
 
+	err = os.Remove(SIFT_GO_LOCATION)
+	if err != nil {
+		log.Println(err)
+	}
 	fo, err := os.Create(SIFT_GO_LOCATION)
 	if err != nil {
 		log.Fatal(err)
