@@ -1,7 +1,7 @@
 FROM quay.io/redsift/sandbox:latest
-LABEL author="Christos Vontas"
-LABEL email="christos@redsift.io"
-LABEL version="1.0.2"
+LABEL author="Anon Cohen"
+LABEL email="amnon.cohen@redsift.io"
+LABEL version="1.1.0"
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -10,8 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ARG golang_version=1.10.8
-ENV GODEP_V=v0.5.0
+ARG golang_version=1.15.4
 
 RUN set -eux; \
     url="https://golang.org/dl/go${golang_version}.linux-amd64.tar.gz"; \
@@ -22,25 +21,19 @@ RUN set -eux; \
     go version
 
 COPY root /
-COPY go-wrapper /usr/local/bin/
-
-ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 
 ENV GOPATH /usr/lib/redsift/workspace
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
+ENV GO111MODULE on
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
-COPY Gopkg.* $SANDBOX_PATH/
+COPY go.* $SANDBOX_PATH/
 
 WORKDIR $SANDBOX_PATH
 
-RUN wget -O /usr/local/bin/dep "https://github.com/golang/dep/releases/download/${GODEP_V}/dep-linux-amd64" && \
-    chmod +x /usr/local/bin/dep && \
-    ln -s /run/sandbox/sift/server $GOPATH/src/server && \
-    dep ensure -v && dep status && \
-    rm -rf vendor/$RPC_REPO && \
+RUN \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH

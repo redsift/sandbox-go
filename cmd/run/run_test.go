@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"testing"
@@ -40,7 +41,10 @@ func TestComputeRequest(t *testing.T) {
 func TestMain(m *testing.M) {
 	go func() {
 		cmd := exec.Command("/usr/bin/redsift/run", "1")
-		stdoutStderr, _ := cmd.CombinedOutput()
+		stdoutStderr, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Fatalln(err)
+		}
 		fmt.Printf("%s\n", stdoutStderr)
 	}()
 	os.Exit(m.Run())
