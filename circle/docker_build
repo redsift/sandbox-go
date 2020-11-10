@@ -14,12 +14,6 @@ if [ $tagName == "release" ]; then
 fi
 imageName=$CONTAINER_NAME:v$GV$SUFFIX
 
-LOCAL_RPC_REPO="root/usr/lib/redsift/workspace/src/${RPC_REPO}"
-git clone "git@${RPC_REPO/com\//com:}" $LOCAL_RPC_REPO
-pushd $LOCAL_RPC_REPO
-git checkout $RPC_REPO_COMMIT
-popd
-
 echo "Configuring FROM and ENTRYPOINT in Dockerfile with base=sandbox:${parentVersion}"
 sed "s/^\(FROM quay.io\/redsift\/sandbox:\).*$/\1${parentVersion}/" < Dockerfile > Dockerfile.versioned
 

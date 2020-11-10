@@ -8,8 +8,5 @@ if [ -n "${GITHUB_HTTP_TOKEN:-}" ]; then
   git config --global url."https://$GITHUB_HTTP_TOKEN:@github.com/".insteadOf "git@github.com:"
 fi
 
-cd $GOPATH/src/server
-go install ./...
-
 cd $GOPATH/src/github.com/redsift/sandbox-go
 exec /usr/bin/redsift/go_install $@
