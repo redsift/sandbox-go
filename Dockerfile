@@ -1,5 +1,5 @@
 FROM quay.io/redsift/sandbox:latest
-LABEL author="Anon Cohen"
+LABEL author="Amnon Cohen"
 LABEL email="amnon.cohen@redsift.io"
 LABEL version="1.1.0"
 
