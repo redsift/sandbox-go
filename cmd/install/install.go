@@ -15,7 +15,7 @@ const SANDBOX_PATH = "/run/sandbox/sift/"
 const PROJECT_LOCATION = SANDBOX_PATH
 
 //const SIFT_GO_LOCATION = PROJECT_LOCATION + "/sandbox/sift.go"
-const SIFT_GO_LOCATION = PROJECT_LOCATION + "/tmp/sift.go"
+const SIFT_GO_LOCATION = "/tmp/sift.go"
 
 const siftTemp = `package sandbox
 
