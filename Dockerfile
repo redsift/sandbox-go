@@ -35,7 +35,6 @@ WORKDIR $SANDBOX_PATH
 
 RUN \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
-    chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH
 
 
