@@ -21,7 +21,6 @@ RUN set -eux; \
     go version
 
 COPY root /
-COPY go-wrapper /usr/local/bin/
 
 ENV RPC_REPO github.com/redsift/go-sandbox-rpc
 
@@ -37,7 +36,6 @@ COPY go.* $SANDBOX_PATH/
 WORKDIR $SANDBOX_PATH
 
 RUN \
-    ln -s /run/sandbox/sift/server $GOPATH/src/server && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chmod +x /usr/bin/redsift/go_install && \
     chown -R sandbox:sandbox $GOPATH
