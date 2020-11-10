@@ -1,7 +1,7 @@
 FROM quay.io/redsift/sandbox:latest
-LABEL author="Christos Vontas"
-LABEL email="christos@redsift.io"
-LABEL version="1.0.2"
+LABEL author="Anon Cohen"
+LABEL email="amnon.cohen@redsift.io"
+LABEL version="1.1.0"
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -22,8 +22,6 @@ RUN set -eux; \
 
 COPY root /
 
-ENV RPC_REPO github.com/redsift/go-sandbox-rpc
-
 ENV GOPATH /usr/lib/redsift/workspace
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
@@ -37,8 +35,7 @@ WORKDIR $SANDBOX_PATH
 
 RUN \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
-    chmod +x /usr/bin/redsift/go_install && \
-    chown -R sandbox:sandbox $GOPATH
+    chmod +x /usr/bin/redsift/go_install
 
 
 WORKDIR /run/sandbox/sift
