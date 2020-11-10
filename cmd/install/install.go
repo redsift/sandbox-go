@@ -11,8 +11,8 @@ import (
 	"github.com/redsift/sandbox-go/sandbox"
 )
 
-const SANDBOX_PATH = "github.com/redsift/sandbox-go"
-const PROJECT_LOCATION = "/usr/lib/redsift/workspace/src/" + SANDBOX_PATH
+const SANDBOX_PATH = "/run/sandbox/sift/"
+const PROJECT_LOCATION = SANDBOX_PATH
 const SIFT_GO_LOCATION = PROJECT_LOCATION + "/sandbox/sift.go"
 const sift_temp = `package sandbox
 

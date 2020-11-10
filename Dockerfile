@@ -22,9 +22,8 @@ RUN set -eux; \
 
 COPY root /
 
-ENV GOPATH /usr/lib/redsift/workspace
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
+ENV PATH /usr/local/go/bin:$PATH
+ENV SANDBOX_PATH /run/sandbox/sift/
 ENV GO111MODULE on
 
 COPY cmd $SANDBOX_PATH/cmd
