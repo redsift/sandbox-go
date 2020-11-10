@@ -1,2 +1,2 @@
-github.com/redsift/go-sandbox-rpc v0.0.0-20200511193908-a6e5d4529bf7 h1:6Fjspu17JoCBBO3ves6b9mnKwoxxUmLjow6buRDwFRQ=
-github.com/redsift/go-sandbox-rpc v0.0.0-20200511193908-a6e5d4529bf7/go.mod h1:57m4ei6UvUwdB8jFxy5QWDLhIgYngPfI+dIRnoPndUI=
+github.com/redsift/go-sandbox-rpc v0.1.0 h1:RAMxFMK7XE7qD8KJd6n2Pl5Mof4+9IA9UAe9eiMx8oU=
+github.com/redsift/go-sandbox-rpc v0.1.0/go.mod h1:57m4ei6UvUwdB8jFxy5QWDLhIgYngPfI+dIRnoPndUI=
