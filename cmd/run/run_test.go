@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/redsift/go-mangosock"
-	"github.com/redsift/go-mangosock/nano"
+	"nanomsg.org/go-mangos/nano"
+	mangosock "nanomsg.org/go-mangos"
 	"github.com/redsift/go-sandbox-rpc"
 )
 

@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/redsift/go-mangosock"
-	"github.com/redsift/go-mangosock/nano"
+	mangosock "nanomsg.org/go-mangos"
+	"nanomsg.org/go-mangos/nano"
 	"github.com/redsift/go-sandbox-rpc"
 	"github.com/redsift/sandbox-go/sandbox"
 )
