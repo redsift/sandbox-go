@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/redsift/go-mangosock v0.2.0
-	github.com/redsift/go-sandbox-rpc v0.0.0-20190108170927-e56484a1d427
+	github.com/redsift/go-sandbox-rpc v0.1.0
 )
 
 replace server => /run/sandbox/sift/server
