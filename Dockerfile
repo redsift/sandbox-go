@@ -14,7 +14,7 @@ ARG golang_version=1.15.4
 
 RUN set -eux; \
     url="https://golang.org/dl/go${golang_version}.linux-amd64.tar.gz"; \
-    wget -O go.tgz "$url"; \
+    wget --no-verbose -O go.tgz "$url"; \
     tar -C /usr/local -xzf go.tgz; \
     rm go.tgz; \
     export PATH="/usr/local/go/bin:$PATH"; \
@@ -26,7 +26,7 @@ ENV PATH /usr/local/go/bin:$PATH
 ENV SANDBOX_PATH /build/
 ENV GO111MODULE on
 ENV GOPRIVATE github.com/redsift
-ENV GOMODCACHE /tmp/
+ENV GOMODCACHE /gocache/
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
@@ -35,6 +35,8 @@ COPY go.* $SANDBOX_PATH/
 WORKDIR $SANDBOX_PATH
 
 RUN \
+    mkdir $GOMODCACHE && \
+    chmod 777 $GOMODCACHE && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chown -R sandbox:sandbox $SANDBOX_PATH && \
     chmod  777 $SANDBOX_PATH/sandbox
