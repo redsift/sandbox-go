@@ -25,6 +25,7 @@ COPY root /
 ENV PATH /usr/local/go/bin:$PATH
 ENV SANDBOX_PATH /build/
 ENV GO111MODULE on
+ENV GOPRIVATE github.com/redsift
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
