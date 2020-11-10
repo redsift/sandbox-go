@@ -5,3 +5,4 @@ github.com/redsift/go-mangosock v0.0.0-20180115012248-fa9f5b559a93/go.mod h1:AaR
 github.com/redsift/go-sandbox-rpc v0.0.0-20190108170927-e56484a1d427 h1:NIZ+0raRfOIGNI5/uM/0snTB4OtxGKHtW8VcTpz+1Dg=
 github.com/redsift/go-sandbox-rpc v0.0.0-20190108170927-e56484a1d427/go.mod h1:57m4ei6UvUwdB8jFxy5QWDLhIgYngPfI+dIRnoPndUI=
 github.com/redsift/go-sandbox-rpc v0.0.0-20200511193908-a6e5d4529bf7 h1:6Fjspu17JoCBBO3ves6b9mnKwoxxUmLjow6buRDwFRQ=
+github.com/redsift/go-sandbox-rpc v0.0.0-20200511193908-a6e5d4529bf7/go.mod h1:57m4ei6UvUwdB8jFxy5QWDLhIgYngPfI+dIRnoPndUI=
