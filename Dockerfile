@@ -38,7 +38,7 @@ RUN \
     mkdir $GOPATH && \
     chmod 777 $GOPATH && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
-    chown -R sandbox:sandbox $GOPATH \
+    chown -R sandbox:sandbox $GOPATH && \
     chown -R sandbox:sandbox $SANDBOX_PATH && \
     chmod  777 $SANDBOX_PATH/sandbox
 
