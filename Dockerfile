@@ -23,7 +23,7 @@ RUN set -eux; \
 COPY root /
 
 ENV PATH /usr/local/go/bin:$PATH
-ENV SANDBOX_PATH /run/sandbox/sift
+ENV SANDBOX_PATH /build/
 ENV GO111MODULE on
 
 COPY cmd $SANDBOX_PATH/cmd
