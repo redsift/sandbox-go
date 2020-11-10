@@ -23,7 +23,7 @@ RUN set -eux; \
 COPY root /
 
 ENV PATH /usr/local/go/bin:$PATH
-ENV SANDBOX_PATH /run/sandbox/sift/
+ENV SANDBOX_PATH /run/sandbox/sift
 ENV GO111MODULE on
 
 COPY cmd $SANDBOX_PATH/cmd
@@ -34,6 +34,7 @@ WORKDIR $SANDBOX_PATH
 
 RUN \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
+    mkdir -p $SANDBOX_PATH/sandbox
     chown -R sandbox:sandbox $SANDBOX_PATH
 
 
