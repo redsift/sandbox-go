@@ -11,10 +11,13 @@ import (
 	"github.com/redsift/sandbox-go/sandbox"
 )
 
-const SANDBOX_PATH = "github.com/redsift/sandbox-go"
-const PROJECT_LOCATION = "/usr/lib/redsift/workspace/src/" + SANDBOX_PATH
-const SIFT_GO_LOCATION = PROJECT_LOCATION + "/sandbox/sift.go"
-const sift_temp = `package sandbox
+const SANDBOX_PATH = "/build/"
+const PROJECT_LOCATION = SANDBOX_PATH
+
+const SIFT_GO_LOCATION = PROJECT_LOCATION + "sandbox/sift.go"
+
+const siftTemp = `
+package sandbox
 
 import (
 	"github.com/redsift/go-sandbox-rpc"{{range $p := .Paths}}
@@ -25,11 +28,14 @@ var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResp
 	{{$i}} : {{$e}}.Compute,{{end}}
 }`
 
+var siftTemplate = template.Must(template.New("sift.go").Parse(siftTemp))
+
 func main() {
 	info, err := sandbox.NewInit(os.Args[1:])
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.SetFlags(log.Lshortfile)
 
 	uniquePaths := map[string]int{}
 	nodeNames := map[int]string{}
@@ -65,22 +71,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		if err := fo.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	t := template.New("sift.go")
-	t, _ = t.Parse(sift_temp)
-	err = t.Execute(fo, struct {
+	err = siftTemplate.Execute(fo, struct {
 		Paths     []string
 		NodeNames map[int]string
 	}{paths, nodeNames})
 	if err != nil {
 		log.Fatalf("Failed to generate sift.go: %s", err.Error())
 	}
-
+	err = fo.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 	//
 	// Build Phase
 	//

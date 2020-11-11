@@ -1,5 +1,5 @@
 FROM quay.io/redsift/sandbox:latest
-LABEL author="Anon Cohen"
+LABEL author="Amnon Cohen"
 LABEL email="amnon.cohen@redsift.io"
 LABEL version="1.1.0"
 
@@ -14,7 +14,7 @@ ARG golang_version=1.15.4
 
 RUN set -eux; \
     url="https://golang.org/dl/go${golang_version}.linux-amd64.tar.gz"; \
-    wget -O go.tgz "$url"; \
+    wget --no-verbose -O go.tgz "$url"; \
     tar -C /usr/local -xzf go.tgz; \
     rm go.tgz; \
     export PATH="/usr/local/go/bin:$PATH"; \
@@ -22,10 +22,11 @@ RUN set -eux; \
 
 COPY root /
 
-ENV GOPATH /usr/lib/redsift/workspace
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ENV SANDBOX_PATH $GOPATH/src/github.com/redsift/sandbox-go
+ENV PATH /usr/local/go/bin:$PATH
+ENV SANDBOX_PATH /build/
 ENV GO111MODULE on
+ENV GOPRIVATE github.com/redsift
+ENV GOMODCACHE /gocache/
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
@@ -34,9 +35,12 @@ COPY go.* $SANDBOX_PATH/
 WORKDIR $SANDBOX_PATH
 
 RUN \
+    mkdir $GOMODCACHE && \
+    chmod 777 $GOMODCACHE && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
-    chmod +x /usr/bin/redsift/go_install && \
-    chown -R sandbox:sandbox $GOPATH
+    chown -R sandbox:sandbox $GOMODCACHE && \
+    chown -R sandbox:sandbox $SANDBOX_PATH && \
+    chmod  777 $SANDBOX_PATH/sandbox
 
 
 WORKDIR /run/sandbox/sift
