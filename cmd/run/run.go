@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"runtime/debug"
 	"sync"
@@ -22,8 +23,7 @@ type result struct {
 func main() {
 	info, err := sandbox.NewInit(os.Args[1:])
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	panicked := false
@@ -31,12 +31,11 @@ func main() {
 	for _, i := range info.Nodes {
 		node := info.Sift.Dag.Nodes[i]
 		if node.Implementation == nil || len(node.Implementation.Go) == 0 {
-			fmt.Printf("Requested to run a non-Go node at index %d\n", i)
-			os.Exit(1)
+			log.Fatalf("Requested to run a non-Go node at index %d\n", i)
 		}
 
 		implPath := node.Implementation.Go
-		fmt.Printf("Running node: %s : %s\n", node.Description, implPath)
+		log.Printf("Running node: %s : %s\n", node.Description, implPath)
 
 		if info.DRY {
 			continue
@@ -75,7 +74,7 @@ func main() {
 				if event != nil {
 					panicked = true
 					stack := debug.Stack()
-					fmt.Printf("Stack: %s\n", stack)
+					log.Printf("Stack: %s\n", stack)
 
 					err := errors.New("panic")
 					if evErr, ok := event.(error); ok {
@@ -83,10 +82,9 @@ func main() {
 					}
 
 					if canSend {
-						fmt.Println("canSend")
 						sendErr(err, string(stack))
 					}
-					fmt.Printf("caught a sandbox panic: %s\n", err)
+					log.Printf("caught a sandbox panic: %s\n", err)
 					//die("caught a node panic: %s", err)
 				}
 			}()
@@ -116,7 +114,7 @@ func main() {
 						event := recover()
 						if event != nil {
 							stack := debug.Stack()
-							fmt.Printf("Stack: %s\n", stack)
+							log.Printf("Stack: %s\n", stack)
 
 							err := errors.New("panic")
 							if evErr, ok := event.(error); ok {
@@ -130,7 +128,7 @@ func main() {
 								},
 							}
 
-							fmt.Printf("caught a node panic: %s\n", err)
+							log.Printf("caught a node panic: %s\n", err)
 						}
 					}()
 
@@ -181,6 +179,5 @@ func main() {
 }
 
 func die(format string, v ...interface{}) {
-	fmt.Fprintln(os.Stderr, fmt.Sprintf(format, v...))
-	os.Exit(1)
+	log.Fatalln(fmt.Sprintf(format, v...))
 }
