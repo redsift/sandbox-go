@@ -8,8 +8,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/redsift/sandbox-go/modedit"
 	"github.com/redsift/sandbox-go/sandbox"
+	"github.com/redsift/sandbox-go/sandbox/modedit"
 )
 
 const PROJECT_LOCATION = "/build/"
