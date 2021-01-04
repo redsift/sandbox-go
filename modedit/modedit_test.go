@@ -30,7 +30,7 @@ replace github.com/tecbot/gorocksdb => github.com/redsift/gorocksdb v0.0.0-20180
 
 func TestCopyReplace(t *testing.T) {
 	out := filepath.Join(t.TempDir(), "new.mod")
-	err := CopyReplace("testdata/insights.mod", "testdata/sandbox.mod", out)
+	err := CopyReplace("testdata/insights.mod.test", "testdata/sandbox.mod.test", out)
 	require.NoError(t, err)
 
 	res, err := ioutil.ReadFile(out)
