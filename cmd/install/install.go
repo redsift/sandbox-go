@@ -9,10 +9,10 @@ import (
 	"text/template"
 
 	"github.com/redsift/sandbox-go/sandbox"
+	"github.com/redsift/sandbox-go/sandbox/modedit"
 )
 
-const SANDBOX_PATH = "/build/"
-const PROJECT_LOCATION = SANDBOX_PATH
+const PROJECT_LOCATION = "/build/"
 
 const SIFT_GO_LOCATION = PROJECT_LOCATION + "sandbox/sift.go"
 
@@ -85,6 +85,10 @@ func main() {
 	//
 	// Build Phase
 	//
+	// copy replace directives from sift go.mod to sandbox go.mod
+	sbxMod := path.Join(PROJECT_LOCATION, "go.mod")
+	modedit.CopyReplace(path.Join(info.SIFT_ROOT, "server", "go.mod"), sbxMod, sbxMod)
+	
 	buildArgs := []string{"build"}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")
