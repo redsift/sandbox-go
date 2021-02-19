@@ -32,6 +32,7 @@ func CopyReplace(fromFile string, toFile string, newFile string) error {
 	for _, r := range f.Replace {
 		t.AddReplace(r.Old.Path, r.Old.Version, r.New.Path, r.New.Version)
 	}
+	t.AddRequire("server", "v1.0.0")
 	t.Cleanup()
 	buf, err := t.Format()
 	if err != nil {
@@ -39,4 +40,3 @@ func CopyReplace(fromFile string, toFile string, newFile string) error {
 	}
 	return ioutil.WriteFile(newFile, buf, 0644)
 }
-
