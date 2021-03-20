@@ -3,6 +3,7 @@ package modedit
 import (
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 
 	"golang.org/x/mod/modfile"
@@ -58,7 +59,7 @@ func parseSum(data []byte) map[string]string {
 	return m
 }
 
-// CopyReplace copies all replace directives in fromFile and adds them to toFile, writing the output
+// CopySum copies all replace sum lines in f1 and adds them to f2, writing the output
 // to newFile.
 func CopySum(f1 string, f2 string, newFile string) error {
 	f, err := os.ReadFile(f1)
@@ -69,25 +70,27 @@ func CopySum(f1 string, f2 string, newFile string) error {
 	if err != nil {
 		return err
 	}
+	fl := parseSum(f)
+	tl := parseSum(t)
+
+	out := strings.Split(string(t), "\n")
+	out = out[:len(out)-1]
+	for m, l := range fl {
+		_, alreadyThere := tl[m]
+		if alreadyThere || l == "" {
+			continue
+		}
+		out = append(out, l)
+	}
+	sort.Strings(out)
 	o, err := os.OpenFile(newFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
 	}
-	_, err = o.Write(t)
+	buf := strings.Join(out, "\n") + "\n"
+	_, err = o.Write([]byte(buf))
 	if err != nil {
 		return err
-	}
-	fl := parseSum(f)
-	tl := parseSum(t)
-	for m, l := range fl {
-		_, alreadyThere := tl[m]
-		if alreadyThere {
-			continue
-		}
-		_, err := o.Write([]byte(l + "\n"))
-		if err != nil {
-			return err
-		}
 	}
 	return o.Close()
 }
