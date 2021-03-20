@@ -2,6 +2,8 @@ package modedit
 
 import (
 	"io/ioutil"
+	"os"
+	"strings"
 
 	"golang.org/x/mod/modfile"
 )
@@ -40,4 +42,52 @@ func CopyReplace(fromFile string, toFile string, newFile string) error {
 		return err
 	}
 	return ioutil.WriteFile(newFile, buf, 0644)
+}
+
+func parseSum(data []byte) map[string]string {
+	lines := strings.Split(string(data), "\n")
+
+	m := make(map[string]string, len(lines))
+	for _, l := range lines {
+		w := strings.Fields(l)
+		if len(w) != 3 {
+			continue
+		}
+		m[w[0]+" "+w[1]] = l
+	}
+	return m
+}
+
+// CopyReplace copies all replace directives in fromFile and adds them to toFile, writing the output
+// to newFile.
+func CopySum(f1 string, f2 string, newFile string) error {
+	f, err := os.ReadFile(f1)
+	if err != nil {
+		return err
+	}
+	t, err := os.ReadFile(f2)
+	if err != nil {
+		return err
+	}
+	o, err := os.OpenFile(newFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	_, err = o.Write(t)
+	if err != nil {
+		return err
+	}
+	fl := parseSum(f)
+	tl := parseSum(t)
+	for m, l := range fl {
+		_, alreadyThere := tl[m]
+		if alreadyThere {
+			continue
+		}
+		_, err := o.Write([]byte(l + "\n"))
+		if err != nil {
+			return err
+		}
+	}
+	return o.Close()
 }
