@@ -88,7 +88,10 @@ func main() {
 	// copy replace directives from sift go.mod to sandbox go.mod
 	sbxMod := path.Join(PROJECT_LOCATION, "go.mod")
 	modedit.CopyReplace(path.Join(info.SIFT_ROOT, "server", "go.mod"), sbxMod, sbxMod)
-	
+
+	sbxSum := path.Join(PROJECT_LOCATION, "go.sum")
+	modedit.CopySum(path.Join(info.SIFT_ROOT, "server", "go.sum"), sbxSum, sbxSum)
+
 	buildArgs := []string{"build"}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")

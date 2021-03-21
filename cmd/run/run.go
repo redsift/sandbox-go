@@ -21,6 +21,7 @@ type result struct {
 }
 
 func main() {
+	log.SetFlags(log.Lshortfile)
 	info, err := sandbox.NewInit(os.Args[1:])
 	if err != nil {
 		log.Fatalln(err)
