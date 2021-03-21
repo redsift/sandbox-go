@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -29,6 +30,12 @@ var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResp
 }`
 
 var siftTemplate = template.Must(template.New("sift.go").Parse(siftTemp))
+
+func dump(fn string) {
+	txt, _ := ioutil.ReadFile(fn)
+	log.Println(fn)
+	log.Printf("%s", txt)
+}
 
 func main() {
 	info, err := sandbox.NewInit(os.Args[1:])
@@ -89,18 +96,23 @@ func main() {
 	sbxMod := path.Join(PROJECT_LOCATION, "go.mod")
 	modedit.CopyReplace(path.Join(info.SIFT_ROOT, "server", "go.mod"), sbxMod, sbxMod)
 
+	dump(sbxMod)
+
 	sbxSum := path.Join(PROJECT_LOCATION, "go.sum")
 	modedit.CopySum(path.Join(info.SIFT_ROOT, "server", "go.sum"), sbxSum, sbxSum)
+	dump(sbxSum)
 
 	buildArgs := []string{"build"}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")
 	}
-	buildArgs = append(buildArgs, "-v", "-o", "/run/sandbox/sift/server/_run", path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
+	buildArgs = append(buildArgs, "-v", "-mod=mod", "-o", "/run/sandbox/sift/server/_run", path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
 	bcmd := exec.Command("go", buildArgs...)
 	bstdoutStderr, err := bcmd.CombinedOutput()
 	log.Printf("%s\n", bstdoutStderr)
 	if err != nil {
 		log.Fatalf("Building sandbox failed: %s", err)
 	}
+	dump(sbxMod)
+	dump(sbxSum)
 }
