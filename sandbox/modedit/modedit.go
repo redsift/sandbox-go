@@ -35,7 +35,9 @@ func CopyReplace(fromFile string, toFile string, newFile string) error {
 	for _, r := range f.Replace {
 		t.AddReplace(r.Old.Path, r.Old.Version, r.New.Path, r.New.Version)
 	}
-	t.SetRequire(f.Require)
+	for _, r := range f.Require {
+		t.AddNewRequire(r.Mod.Path, r.Mod.Version, r.Indirect)
+	}
 	t.AddRequire(f.Module.Mod.Path, "v1.0.0")
 	t.Cleanup()
 	buf, err := t.Format()

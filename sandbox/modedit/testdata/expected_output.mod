@@ -3,15 +3,9 @@ module github.com/redsift/sandbox-go
 go 1.15
 
 require (
-	github.com/blevesearch/bleve v1.0.14
-	github.com/blevesearch/blevex v1.0.0
-	github.com/cenkalti/backoff/v4 v4.1.0
-	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/redsift/go-sandbox-rpc v0.1.0 // indirect
-	github.com/redsift/go-stats v0.2.0
-	github.com/stretchr/testify v1.6.1
-	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	github.com/redsift/aaa v0.1.2
+	github.com/redsift/bbb v0.1.0
+	github.com/redsift/ccc v0.1.0 // indirect
 	server v1.0.0
 )
 
