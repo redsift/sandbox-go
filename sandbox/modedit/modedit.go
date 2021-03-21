@@ -21,6 +21,15 @@ func load(fn string) (*modfile.File, error) {
 	return f, nil
 }
 
+func alreadyPresent(r *modfile.Require, list []*modfile.Require) bool {
+	for _, l := range list {
+		if r.Mod == l.Mod {
+			return true
+		}
+	}
+	return false
+}
+
 // CopyReplace copies all replace directives in fromFile and adds them to toFile, writing the output
 // to newFile.
 func CopyReplace(fromFile string, toFile string, newFile string) error {
@@ -36,6 +45,9 @@ func CopyReplace(fromFile string, toFile string, newFile string) error {
 		t.AddReplace(r.Old.Path, r.Old.Version, r.New.Path, r.New.Version)
 	}
 	for _, r := range f.Require {
+		if alreadyPresent(r, t.Require) {
+			continue
+		}
 		t.AddNewRequire(r.Mod.Path, r.Mod.Version, r.Indirect)
 	}
 	t.AddRequire(f.Module.Mod.Path, "v1.0.0")
