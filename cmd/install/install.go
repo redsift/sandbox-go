@@ -103,4 +103,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Building sandbox failed: %s", err)
 	}
+	log.Printf("Installed nodes: %v : %v", nodeNames, uniquePaths)
 }
