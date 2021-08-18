@@ -92,7 +92,7 @@ func main() {
 	sbxSum := path.Join(PROJECT_LOCATION, "go.sum")
 	modedit.CopySum(path.Join(info.SIFT_ROOT, "server", "go.sum"), sbxSum, sbxSum)
 
-	buildArgs := []string{"build"}
+	buildArgs := []string{"build", "-mod", "mod"}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")
 	}
