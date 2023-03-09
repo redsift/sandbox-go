@@ -49,7 +49,6 @@ workflows:
     jobs:
       - build_default:
           context: org-global
-      # Don't trigger this build, as it would generate a new version of the sandbox-go-rocksdb sandbox, which should be controlled by manually deploying it when needed
-      # - trigger-builds:
-      #     requires:
-      #       - build_default
+      - trigger-builds:
+          requires:
+            - build_default
