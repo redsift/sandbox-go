@@ -35,7 +35,7 @@ jobs:
     executor: dockexec
     steps:
       - v_build:
-          nv: "1.17"
+          nv: "1.20.2"
 
   trigger-builds:
     executor: dockexec
@@ -49,6 +49,7 @@ workflows:
     jobs:
       - build_default:
           context: org-global
-      - trigger-builds:
-          requires:
-            - build_default
+      # Don't trigger this build, as it would generate a new version of the sandbox-go-rocksdb sandbox, which should be controlled by manually deploying it when needed
+      # - trigger-builds:
+      #     requires:
+      #       - build_default
