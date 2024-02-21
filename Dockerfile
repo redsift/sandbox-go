@@ -26,7 +26,8 @@ ENV PATH /usr/local/go/bin:$PATH
 ENV SANDBOX_PATH /build/
 ENV GO111MODULE on
 ENV GOPRIVATE github.com/redsift
-ENV GOMODCACHE /gocache/
+ENV GOMODCACHE /gomodcache/
+ENV GOCACHE /gocache/
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
@@ -37,8 +38,11 @@ WORKDIR $SANDBOX_PATH
 RUN \
     mkdir $GOMODCACHE && \
     chmod 777 $GOMODCACHE && \
+    mkdir $GOCACHE && \
+    chmod 777 $GOCACHE && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
     chown -R sandbox:sandbox $GOMODCACHE && \
+    chown -R sandbox:sandbox $GOCACHE && \
     chown -R sandbox:sandbox $SANDBOX_PATH && \
     chmod  777 $SANDBOX_PATH/sandbox
 
