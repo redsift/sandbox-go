@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -18,6 +20,13 @@ import (
 type result struct {
 	response []sandboxrpc.ComputeResponse
 	err      map[string]string
+}
+
+func getRunningGoroutines() (int, []byte) {
+	buf := make([]byte, 1<<10)
+	runtime.Stack(buf, true)
+	parts := bytes.Split(buf, []byte("\n\n"))
+	return len(parts), buf
 }
 
 func main() {
@@ -133,6 +142,8 @@ func main() {
 						}
 					}()
 
+					goroutines_before, _ := getRunningGoroutines()
+
 					nresp, err := sandbox.Computes[idx](cr)
 					if err != nil {
 						ch <- &result{
@@ -141,6 +152,12 @@ func main() {
 							},
 						}
 						return
+					}
+
+					goroutines_after, buf := getRunningGoroutines()
+					if goroutines_after - goroutines_before > 0 {
+						log.Printf("Leaking goroutines number: before %d - after %d\n", goroutines_before, goroutines_before)
+						log.Printf("Leaking goroutines buffer: %s\n", buf)
 					}
 
 					ch <- &result{
