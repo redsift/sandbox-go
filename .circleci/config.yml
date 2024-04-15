@@ -9,8 +9,7 @@ executors:
     shell: /bin/bash
     environment: *envvars
     docker:
-      - image: cibuilds/docker:18.06.3-ce
-
+      - image: cimg/base:current
 
 commands:
   v_build:
@@ -35,7 +34,7 @@ jobs:
     executor: dockexec
     steps:
       - v_build:
-          nv: "1.20.2"
+          nv: "1.22.2"
 
   trigger-builds:
     executor: dockexec
@@ -44,7 +43,6 @@ jobs:
       - run: ./circle/trigger_build
 
 workflows:
-  version: 2.1
   build-and-deploy:
     jobs:
       - build_default:
