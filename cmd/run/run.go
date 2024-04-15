@@ -1,23 +1,32 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"runtime/debug"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/redsift/go-mangosock"
 	"github.com/redsift/go-mangosock/nano"
-	"github.com/redsift/go-sandbox-rpc"
+	sandboxrpc "github.com/redsift/go-sandbox-rpc"
 	"github.com/redsift/sandbox-go/sandbox"
 )
 
 type result struct {
 	response []sandboxrpc.ComputeResponse
 	err      map[string]string
+}
+
+type app struct {
+	info     sandbox.Init
+	wg       *sync.WaitGroup
+	panicked atomic.Bool
 }
 
 func main() {
@@ -27,10 +36,29 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	panicked := false
-	var wg sync.WaitGroup
-	for _, i := range info.Nodes {
-		node := info.Sift.Dag.Nodes[i]
+	var (
+		a = &app{
+			info: info,
+			wg:   &sync.WaitGroup{},
+		}
+		ctx, cancel = signal.NotifyContext(context.Background())
+	)
+
+	defer cancel()
+
+	a.run(ctx)
+	cancel()
+
+	a.wg.Wait()
+
+	if a.panicked.Load() {
+		select {} // wait to get killed
+	}
+}
+
+func (a *app) run(globalContext context.Context) {
+	for _, i := range a.info.Nodes {
+		node := a.info.Sift.Dag.Nodes[i]
 		if node.Implementation == nil || len(node.Implementation.Go) == 0 {
 			log.Fatalf("Requested to run a non-Go node at index %d\n", i)
 		}
@@ -38,13 +66,13 @@ func main() {
 		implPath := node.Implementation.Go
 		log.Printf("Running node: %s : %s\n", node.Description, implPath)
 
-		if info.DRY {
+		if a.info.DRY {
 			continue
 		}
-		wg.Add(1)
-		url := fmt.Sprintf("ipc://%s/%d.sock", info.IPC_ROOT, i)
+		a.wg.Add(1)
+		url := fmt.Sprintf("ipc://%s/%d.sock", a.info.IPC_ROOT, i)
 		go func(url string, idx int) {
-			defer wg.Done()
+			defer a.wg.Done()
 
 			canSend := false
 			var sock nano.Rep
@@ -73,7 +101,7 @@ func main() {
 			defer func() {
 				event := recover()
 				if event != nil {
-					panicked = true
+					a.panicked.Store(true)
 					stack := debug.Stack()
 					log.Printf("Stack: %s\n", stack)
 
@@ -108,9 +136,21 @@ func main() {
 					sendErr(fmt.Errorf("no node with id: %d", idx), "")
 					die("no node with id: %d", idx)
 				}
-				start := time.Now()
-				ch := make(chan *result)
+
+				var (
+					start                     = time.Now()
+					ch                        = make(chan *result)
+					ctx                       = globalContext
+					cancel context.CancelFunc = func() {}
+				)
+
+				if cr.Meta != nil && !cr.Meta.Deadline.IsZero() {
+					ctx, cancel = context.WithDeadline(globalContext, cr.Meta.Deadline)
+				}
+
 				go func(ch chan<- *result) {
+					defer cancel()
+
 					defer func() {
 						event := recover()
 						if event != nil {
@@ -133,7 +173,7 @@ func main() {
 						}
 					}()
 
-					nresp, err := sandbox.Computes[idx](cr)
+					nresp, err := sandbox.Computes[idx](ctx, cr)
 					if err != nil {
 						ch <- &result{
 							err: map[string]string{
@@ -172,13 +212,8 @@ func main() {
 			}
 		}(url, i)
 	}
-	wg.Wait()
-
-	if panicked {
-		select {} // wait to get killed
-	}
 }
 
 func die(format string, v ...interface{}) {
-	log.Fatalln(fmt.Sprintf(format, v...))
+	log.Fatalf(format, v...)
 }

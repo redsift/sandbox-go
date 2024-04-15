@@ -1,7 +1,9 @@
 package sandbox
 
 import (
-	"github.com/redsift/go-sandbox-rpc"
+	"context"
+
+	sandboxrpc "github.com/redsift/go-sandbox-rpc"
 )
 
-var Computes = map[int]func(sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error){}
+var Computes = map[int]func(context.Context, sandboxrpc.ComputeRequest) ([]sandboxrpc.ComputeResponse, error){}
