@@ -11,7 +11,6 @@ executors:
     docker:
       - image: cibuilds/docker:18.06.3-ce
 
-
 commands:
   v_build:
     parameters:
@@ -35,7 +34,7 @@ jobs:
     executor: dockexec
     steps:
       - v_build:
-          nv: "1.18.3"
+          nv: "1.22.3"
 
   trigger-builds:
     executor: dockexec
@@ -44,7 +43,6 @@ jobs:
       - run: ./circle/trigger_build
 
 workflows:
-  version: 2.1
   build-and-deploy:
     jobs:
       - build_default:
