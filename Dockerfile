@@ -28,6 +28,7 @@ ENV GO111MODULE on
 ENV GOPRIVATE github.com/redsift
 ENV GOMODCACHE /gomodcache/
 ENV GOCACHE /gocache/
+ENV GO_BINARY_FILE /run/sandbox/sift/server/_run.${golang_version}
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox

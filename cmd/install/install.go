@@ -96,7 +96,7 @@ func main() {
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")
 	}
-	buildArgs = append(buildArgs, "-v", "-o", "/run/sandbox/sift/server/_run", path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
+	buildArgs = append(buildArgs, "-v", "-o", info.Output, path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
 	bcmd := exec.Command("go", buildArgs...)
 	bstdoutStderr, err := bcmd.CombinedOutput()
 	log.Printf("%s\n", bstdoutStderr)

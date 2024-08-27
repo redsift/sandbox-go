@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strconv"
@@ -16,6 +15,7 @@ type Init struct {
 	SIFT_ROOT string
 	SIFT_JSON string
 	IPC_ROOT  string
+	Output    string
 	DRY       bool
 	Sift      sift.Root
 	Nodes     []int
@@ -29,6 +29,7 @@ func NewInit(args []string) (Init, error) {
 		SIFT_ROOT: os.Getenv("SIFT_ROOT"),
 		SIFT_JSON: os.Getenv("SIFT_JSON"),
 		IPC_ROOT:  os.Getenv("IPC_ROOT"),
+		Output:    os.Getenv("GO_BINARY_FILE"),
 		DRY:       false,
 		Nodes:     []int{},
 	}
@@ -45,12 +46,16 @@ func NewInit(args []string) (Init, error) {
 		return Init{}, errors.New("Environment IPC_ROOT not set")
 	}
 
+	if len(i.Output) == 0 {
+		i.Output = "/run/sandbox/sift/server/_run"
+	}
+
 	if len(os.Getenv("DRY")) > 0 {
 		fmt.Println("Unit Test Mode")
 		i.DRY = true
 	}
 
-	raw, err := ioutil.ReadFile(path.Join(i.SIFT_ROOT, i.SIFT_JSON))
+	raw, err := os.ReadFile(path.Join(i.SIFT_ROOT, i.SIFT_JSON))
 	if err != nil {
 		return Init{}, err
 	}
