@@ -34,7 +34,7 @@ jobs:
     executor: dockexec
     steps:
       - v_build:
-          nv: "1.22.3"
+          nv: "1.23.0"
 
   trigger-builds:
     executor: dockexec
