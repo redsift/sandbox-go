@@ -10,7 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
 
 LABEL io.redsift.sandbox.install="/usr/bin/redsift/install" io.redsift.sandbox.run="/usr/bin/redsift/run"
 
-ARG golang_version=1.17
+ARG golang_version=1.22.3
 
 RUN set -eux; \
     url="https://golang.org/dl/go${golang_version}.linux-amd64.tar.gz"; \
@@ -26,7 +26,8 @@ ENV PATH /usr/local/go/bin:$PATH
 ENV SANDBOX_PATH /build/
 ENV GO111MODULE on
 ENV GOPRIVATE github.com/redsift
-ENV GOMODCACHE /gocache/
+ENV GOMODCACHE /gomodcache/
+ENV GOCACHE /gocache/
 
 COPY cmd $SANDBOX_PATH/cmd
 COPY sandbox $SANDBOX_PATH/sandbox
@@ -35,13 +36,11 @@ COPY go.* $SANDBOX_PATH/
 WORKDIR $SANDBOX_PATH
 
 RUN \
-    mkdir $GOMODCACHE && \
-    chmod 777 $GOMODCACHE && \
+    mkdir -p $GOMODCACHE $GOCACHE && \
+    chmod 777 $GOMODCACHE $GOCACHE && \
     go build -o /usr/bin/redsift/go_install cmd/install/install.go && \
-    chown -R sandbox:sandbox $GOMODCACHE && \
-    chown -R sandbox:sandbox $SANDBOX_PATH && \
+    chown -R sandbox:sandbox $SANDBOX_PATH $GOMODCACHE $GOCACHE && \
     chmod  777 $SANDBOX_PATH/sandbox
-
 
 WORKDIR /run/sandbox/sift
 
