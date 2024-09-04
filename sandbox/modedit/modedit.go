@@ -1,7 +1,6 @@
 package modedit
 
 import (
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -10,7 +9,7 @@ import (
 )
 
 func load(fn string) (*modfile.File, error) {
-	buf, err := ioutil.ReadFile(fn)
+	buf, err := os.ReadFile(fn)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +55,7 @@ func CopyReplace(fromFile string, toFile string, newFile string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(newFile, buf, 0644)
+	return os.WriteFile(newFile, buf, 0644)
 }
 
 func parseSum(data []byte) map[string]string {
