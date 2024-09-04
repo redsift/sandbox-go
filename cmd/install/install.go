@@ -95,6 +95,8 @@ func main() {
 	sbxSum := filepath.Join(PROJECT_LOCATION, "go.sum")
 	modedit.CopySum(filepath.Join(info.SIFT_ROOT, "server", "go.sum"), sbxSum, sbxSum)
 
+	run("go", "mod", "tidy")
+
 	mode := "mod"
 	vendor := filepath.Join(PROJECT_LOCATION, "vendor")
 	if s, err := os.Stat(vendor); err == nil && s.IsDir() {
