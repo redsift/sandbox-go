@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -82,26 +83,48 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	//
 	// Build Phase
 	//
 	// copy replace directives from sift go.mod to sandbox go.mod
-	sbxMod := path.Join(PROJECT_LOCATION, "go.mod")
-	modedit.CopyReplace(path.Join(info.SIFT_ROOT, "server", "go.mod"), sbxMod, sbxMod)
 
-	sbxSum := path.Join(PROJECT_LOCATION, "go.sum")
-	modedit.CopySum(path.Join(info.SIFT_ROOT, "server", "go.sum"), sbxSum, sbxSum)
+	sbxMod := filepath.Join(PROJECT_LOCATION, "go.mod")
+	modedit.CopyReplace(filepath.Join(info.SIFT_ROOT, "server", "go.mod"), sbxMod, sbxMod)
 
-	buildArgs := []string{"build", "-mod", "mod"}
+	sbxSum := filepath.Join(PROJECT_LOCATION, "go.sum")
+	modedit.CopySum(filepath.Join(info.SIFT_ROOT, "server", "go.sum"), sbxSum, sbxSum)
+
+	mode := "mod"
+	vendor := filepath.Join(PROJECT_LOCATION, "vendor")
+	if s, err := os.Stat(vendor); err == nil && s.IsDir() {
+		mode = "vendor"
+		run("go", "mod", "vendor")
+	}
+
+	buildArgs := []string{"build", "-mod", mode}
 	if os.Getenv("LOG_LEVEL") == "debug" {
 		buildArgs = append(buildArgs, "-x")
 	}
-	buildArgs = append(buildArgs, "-v", "-o", info.Output, path.Join(PROJECT_LOCATION, "cmd/run/run.go"))
-	bcmd := exec.Command("go", buildArgs...)
-	bstdoutStderr, err := bcmd.CombinedOutput()
-	log.Printf("%s\n", bstdoutStderr)
-	if err != nil {
+
+	buildArgs = append(buildArgs,
+		"-v",
+		"-o", info.Output,
+		path.Join(PROJECT_LOCATION, "cmd/run/run.go"),
+	)
+
+	run("go", buildArgs...)
+
+	log.Printf("Installed nodes: %v : %v", nodeNames, uniquePaths)
+}
+
+func run(c string, args ...string) {
+	bcmd := exec.Command(c, args...)
+	bcmd.Stdout = os.Stdout
+	bcmd.Stderr = os.Stderr
+	bcmd.Dir = PROJECT_LOCATION
+
+	if err := bcmd.Run(); err != nil {
 		log.Fatalf("Building sandbox failed: %s", err)
 	}
-	log.Printf("Installed nodes: %v : %v", nodeNames, uniquePaths)
 }
