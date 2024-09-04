@@ -6,7 +6,7 @@ require (
 	github.com/redsift/go-mangosock v0.2.1
 	github.com/redsift/go-sandbox-rpc v0.2.0
 	github.com/stretchr/testify v1.2.2
-	golang.org/x/mod v0.4.0
+	golang.org/x/mod v0.20.0
 )
 
 require (
