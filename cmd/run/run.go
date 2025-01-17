@@ -11,7 +11,7 @@ import (
 
 	"github.com/redsift/go-mangosock"
 	"github.com/redsift/go-mangosock/nano"
-	"github.com/redsift/go-sandbox-rpc"
+	sandboxrpc "github.com/redsift/go-sandbox-rpc"
 	"github.com/redsift/sandbox-go/sandbox"
 )
 
@@ -34,9 +34,6 @@ func main() {
 		if node.Implementation == nil || len(node.Implementation.Go) == 0 {
 			log.Fatalf("Requested to run a non-Go node at index %d\n", i)
 		}
-
-		implPath := node.Implementation.Go
-		log.Printf("Running node: %s : %s\n", node.Description, implPath)
 
 		if info.DRY {
 			continue
