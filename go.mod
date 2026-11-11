@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/redsift/go-mangosock v0.2.1
-	github.com/redsift/go-sandbox-rpc v0.3.4
+	github.com/redsift/go-sandbox-rpc v0.4.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/mod v0.43.0
 )
